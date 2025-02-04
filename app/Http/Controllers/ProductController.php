@@ -80,6 +80,23 @@ class ProductController extends Controller
     }
 
     /**
+ * Génère une référence unique pour le produit
+ */
+    protected function generateReference()
+    {
+        $lastProduct = Product::latest()->first();
+        
+        if (!$lastProduct) {
+            return 'PROD00001';
+        }
+        
+        // Extraire le numéro de la référence
+        $lastNumber = (int) substr($lastProduct->reference, 4);
+        $nextNumber = str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+        
+        return 'PROD' . $nextNumber;
+    }
+    /**
      * Affiche le formulaire d'édition d'un produit
      */
     public function edit(Product $product)
@@ -111,13 +128,14 @@ class ProductController extends Controller
      * Supprime un produit
      */
     public function destroy(Product $product)
-    {
+{
+    try {
         $product->delete();
-
-        return redirect()->route('products.index')
-            ->with('success', 'Produit supprimé avec succès');
+        return response()->json(['success' => true, 'message' => 'Produit supprimé avec succès']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Erreur lors de la suppression'], 500);
     }
-
+}
     public function generateReport(Request $request)
     {
         // Récupérer les paramètres
