@@ -1,0 +1,3 @@
+DB :dbgestock
+user : admingestock
+mot de passe :Gestock25@
