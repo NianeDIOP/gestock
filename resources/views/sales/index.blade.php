@@ -857,27 +857,39 @@ function closeShowModal() {
 }
 
 // Suppression d'une vente
+// Dans la section scripts
 function deleteSale(saleId) {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette vente ?")) {
-        fetch(`/sales/${saleId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Vente supprimée avec succès.');
-                location.reload();
-            } else {
-                alert('Erreur lors de la suppression de la vente.');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Une erreur est survenue.');
-        });
-    }
+    Swal.fire({
+        title: 'Êtes-vous sûr?',
+        text: "Cette vente sera définitivement supprimée!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui, supprimer!',
+        cancelButtonText: 'Annuler'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/sales/${saleId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    Swal.fire('Supprimé!', data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    Swal.fire('Erreur!', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('Erreur!', 'Une erreur est survenue', 'error');
+            });
+        }
+    });
 }
 
 // Gestionnaires d'événements globaux
