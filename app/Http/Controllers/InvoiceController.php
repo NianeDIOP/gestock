@@ -98,24 +98,30 @@ class InvoiceController extends Controller
     /**
      * Supprime une facture
      */
+    // app/Http/Controllers/InvoiceController.php
+
     public function destroy(Invoice $invoice)
     {
         try {
+            if($invoice->items()->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette facture contient des articles. Suppression impossible.'
+                ], 422);
+            }
+            
             $invoice->delete();
-            if (request()->ajax()) {
-                return response()->json(['success' => true, 'message' => 'Facture supprimée avec succès']);
-            }
-            return redirect()->route('invoices.index')
-                ->with('success', 'Facture supprimée avec succès.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Facture supprimée avec succès'
+            ]);
         } catch (\Exception $e) {
-            if (request()->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Erreur lors de la suppression'], 500);
-            }
-            return redirect()->route('invoices.index')
-                ->with('error', 'Erreur lors de la suppression de la facture.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression: ' . $e->getMessage()
+            ], 500);
         }
     }
-
     /**
      * Change le statut d'une facture
      */

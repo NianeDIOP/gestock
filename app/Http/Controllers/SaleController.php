@@ -154,13 +154,18 @@ class SaleController extends Controller
     // Affichage d'une vente spécifique
     public function show(Sale $sale)
     {
-        $sale->load(['items.product']);
-        if (request()->ajax()) {
-            // Si c'est une requête AJAX, retourner seulement la vue sans le layout
-            return view('sales.show', compact('sale'))->render();
+        try {
+            $sale->load(['items.product']);
+            if (request()->ajax()) {
+                return view('sales.show', compact('sale'))->render();
+            }
+            return view('sales.show', compact('sale'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Erreur lors du chargement : " . $e->getMessage()
+            ], 422);
         }
-        // Sinon, retourner la vue complète avec le layout
-        return view('sales.show', compact('sale'));
     }
 
     public function edit(Sale $sale)
@@ -277,21 +282,31 @@ class SaleController extends Controller
     public function destroy(Sale $sale)
     {
         try {
-            // Suppression des éléments associés
-            foreach ($sale->items as $item) {
-                $product = $item->product;
-                // Rétablissement du stock
-                $product->increment('quantity', $item->quantity);
-                $item->delete();
+            DB::beginTransaction();
+            
+            // Vérifier les contraintes
+            if($sale->items()->exists()) {
+                foreach ($sale->items as $item) {
+                    $product = $item->product;
+                    $product->increment('quantity', $item->quantity);
+                    $item->delete();
+                }
             }
-
-            // Suppression de la vente
+            
             $sale->delete();
+            DB::commit();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Vente supprimée avec succès.'
+            ]);
 
-            return response()->json(['success' => true, 'message' => 'Vente supprimée avec succès.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Erreur lors de la suppression.'], 500);
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => "Impossible de supprimer cette vente : " . $e->getMessage()
+            ], 422);
         }
     }
-
 }

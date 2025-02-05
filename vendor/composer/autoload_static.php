@@ -34,6 +34,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         '7f7ac2ddea9cc3fb4b2cc201d63dbc10' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Log/functions.php',
         '493c6aea52f6009bab023b26c21a386a' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/functions.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
+        '49fcd9713ec1cb90a60a3cb08b170194' => __DIR__ . '/../..' . '/app/Helpers/NumberToWords.php',
     );
 
     public static $prefixLengthsPsr4 = array (
