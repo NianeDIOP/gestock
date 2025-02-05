@@ -155,6 +155,7 @@
             <p><strong>Sous-total :</strong> {{ number_format($sale->subtotal, 0, ',', ' ') }} FCFA</p>
             <p><strong>TVA ({{ $sale->tax_rate }}%) :</strong> {{ number_format($sale->tax, 0, ',', ' ') }} FCFA</p>
             <p><strong>Total :</strong> {{ number_format($sale->total, 0, ',', ' ') }} FCFA</p>
+            <p><strong>Total en lettres :</strong> {{ ucfirst(numberToWords($sale->total)) }} FCFA</p>
         </div>
     </div>
 
