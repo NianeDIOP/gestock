@@ -40,8 +40,25 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Catégorie supprimée avec succès');
+        try {
+            if($category->products()->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible de supprimer cette catégorie car elle contient des produits.'
+                ], 422);
+            }
+    
+            $category->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Catégorie supprimée avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression : ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function exportPdf()

@@ -143,33 +143,105 @@ function openAddModal() {
    document.getElementById('addModal').classList.remove('hidden');
 }
 
-function closeAddModal() {
-   document.getElementById('addModal').classList.add('hidden');
+// Modifer les fonctions des modales
+function openAddModal() {
+    document.getElementById('addModal').classList.remove('hidden');
+    document.getElementById('addName').value = '';
+    document.getElementById('addDescription').value = '';
 }
 
+
 function openEditModal(id, name, description) {
-   document.getElementById('editName').value = name;
-   document.getElementById('editDescription').value = description;
-   document.getElementById('editForm').action = `/categories/${id}`;
-   document.getElementById('editModal').classList.remove('hidden');
+    document.getElementById('editName').value = name;
+    document.getElementById('editDescription').value = description;
+    document.getElementById('editForm').action = `/categories/${id}`;
+    document.getElementById('editModal').classList.remove('hidden');
 }
+
+
+
+// Ajouter pour la gestion des formulaires
+document.addEventListener('DOMContentLoaded', function() {
+    const addForm = document.querySelector('form[action*="categories.store"]');
+    if(addForm) {
+        addForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    showNotification('Catégorie ajoutée avec succès');
+                    closeAddModal();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Une erreur est survenue', 'error');
+            });
+        });
+    }
+});
 
 function closeEditModal() {
    document.getElementById('editModal').classList.add('hidden');
 }
 
 function confirmDelete(id) {
-   if (confirm('Voulez-vous vraiment supprimer cette catégorie ?')) {
-       const form = document.createElement('form');
-       form.method = 'POST';
-       form.action = `/categories/${id}`;
-       form.innerHTML = `
-           @csrf
-           @method('DELETE')
-       `;
-       document.body.appendChild(form);
-       form.submit();
-   }
+    Swal.fire({
+        title: 'Confirmation',
+        text: 'Voulez-vous vraiment supprimer cette catégorie ?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/categories/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    Swal.fire('Supprimé!', data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    Swal.fire('Erreur!', 'Cette catégorie contient des produits et ne peut pas être supprimée.', 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('Erreur!', 'Une erreur est survenue.', 'error');
+            });
+        }
+    });
+}
+
+
+// Ajouter ces fonctions pour les notifications
+function showNotification(message, type = 'success') {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: type,
+        title: message,
+        showConfirmButton: false,
+        timer: 3000
+    });
 }
 </script>
 @endsection
