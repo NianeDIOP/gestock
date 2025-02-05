@@ -216,7 +216,7 @@
                             {{ now()->format('d/m/Y') }}
                         </p>
                     </div>
-                    <form action="{{ route('admin.logout') }}" method="POST">
+                    <form action="{{ route('auth.logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="flex items-center text-sm text-gray-800 hover:text-blue-600">
                             <i class="fas fa-sign-out-alt mr-2"></i>
@@ -246,7 +246,7 @@
                     <i class="fas fa-calendar-alt mr-2"></i>{{ now()->format('d/m/Y') }}
                 </p>
                 <div class="pt-2 border-t">
-                    <form action="{{ route('admin.logout') }}" method="POST">
+                    <form action="{{ route('auth.logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full text-left text-sm text-gray-800 hover:text-blue-600">
                             <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion

@@ -12,6 +12,11 @@
             <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
                 <i class="fas fa-edit mr-2"></i>Modifier
             </button>
+            <a href="{{ route('users.index') }}" 
+   onclick="openAuthModal(event, '{{ route('users.index') }}')" 
+   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
+    <i class="fas fa-users mr-2"></i>Gestion des utilisateurs
+</a>
         </div>
 
         <!-- Modale de vérification -->
@@ -125,6 +130,48 @@
         </div>
     </form>
 </div>
+</div>
+
+
+<!-- Modale de vérification -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md border border-gray-300 transform transition-all duration-300">
+        <div class="p-6">
+            <!-- En-tête modale -->
+            <div class="flex justify-between items-center mb-5">
+                <div class="flex items-center">
+                    <i class="fas fa-lock text-blue-600 mr-3 text-xl"></i>
+                    <h3 class="text-xl font-semibold text-gray-800">Authentification requise</h3>
+                </div>
+                <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Corps modale -->
+            <div class="space-y-4">
+                <p class="text-gray-600 text-sm">Veuillez saisir le mot de passe d'administration :</p>
+                
+                <input type="password" id="authPassword" 
+                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                       placeholder="Mot de passe">
+                
+                <p id="passwordError" class="text-red-600 text-sm font-medium hidden"></p>
+            </div>
+
+            <!-- Pied de modale -->
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeAuthModal()" 
+                        class="px-5 py-2 text-gray-600 hover:text-gray-800 font-medium">
+                    Annuler
+                </button>
+                <button onclick="verifyPassword()" 
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                    Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 

@@ -1,5 +1,8 @@
 <?php
 
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Setting;
 use App\Http\Controllers\CategoryController;
@@ -12,32 +15,22 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\QuotationController;
 
-// Page de connexion admin
-Route::get('/', function () {
-   $settings = Setting::first();
-   return view('admin.login', compact('settings'));
-})->name('admin.login');
+// Routes d'authentification
+Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
-// Vérification des identifiants admin
-Route::post('/admin/check', function () {
-   $email = request('email');
-   $password = request('password');
-   if ($email === 'admin@ayibdiop.com' && $password === 'admin123') {
-       session(['admin' => true]);
-       return redirect()->route('dashboard');
-   }
-   return back()->withErrors(['email' => 'Identifiants incorrects.']);
-})->name('admin.check');
+// Routes protégées
+Route::middleware(['auth'])->group(function () {
 
-// Déconnexion admin
-Route::post('/admin/logout', function () {
-   session()->forget('admin');
-   return redirect()->route('admin.login');
-})->name('admin.logout');
+   Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    // Route pour supprimer un utilisateur
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
-// Routes protégées par le middleware admin
-Route::middleware('admin')->group(function () {
-   // Tableau de bord
+
+
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
    Route::get('/dashboard/filter', [DashboardController::class, 'filter'])->name('dashboard.filter');
    
@@ -107,6 +100,7 @@ Route::prefix('settings')->group(function () {
     Route::post('/verify-password', [SettingsController::class, 'verifyPassword'])->name('settings.verify');
     Route::post('/', [SettingsController::class, 'update'])->name('settings');
 });
+
 
 Route::get('/generate-report', [ReportController::class, 'generateReport']);
 
