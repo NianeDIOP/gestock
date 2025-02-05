@@ -55,58 +55,78 @@
             </div>
         </div>
 
-        <!-- Formulaire -->
-        <form action="{{ route('settings') }}" method="POST" id="settingsForm">
-            @csrf
-            <div class="space-y-5">
-                <!-- Nom de l'entreprise -->
-                <div class="form-group">
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-building text-blue-600 mr-2"></i>Nom de l'entreprise
-                    </label>
-                    <input type="text" name="name" value="{{ $settings->name ?? '' }}" 
-                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-                </div>
-
-                <!-- NINEA -->
-                <div class="form-group">
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-id-card text-blue-600 mr-2"></i>NINEA
-                    </label>
-                    <input type="text" name="ninea" value="{{ $settings->ninea ?? '' }}"
-                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-                </div>
-
-                <!-- Adresse -->
-                <div class="form-group">
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Adresse
-                    </label>
-                    <input type="text" name="address" value="{{ $settings->address ?? '' }}"
-                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-                </div>
-
-                <!-- Téléphone -->
-                <div class="form-group">
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-phone text-blue-600 mr-2"></i>Téléphone
-                    </label>
-                    <input type="text" name="phone" value="{{ $settings->phone ?? '' }}"
-                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-                </div>
+       <!-- Formulaire -->
+       <form action="{{ route('settings') }}" method="POST" id="settingsForm">
+        @csrf
+        <div class="space-y-5">
+            <!-- Nom de l'entreprise -->
+            <div class="form-group">
+                <label class="block mb-2 text-gray-700 font-medium">
+                    <i class="fas fa-building text-blue-600 mr-2"></i>Nom de l'entreprise
+                </label>
+                <input type="text" name="name" value="{{ $settings->name ?? '' }}" 
+                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
             </div>
 
-            <!-- Bouton de soumission -->
-            <div class="mt-8 text-center">
-                <button type="submit" id="submitBtn" 
-                        class="px-8 py-3 bg-gray-400 text-white rounded-lg font-bold cursor-not-allowed transition-all"
-                        disabled>
-                    <i class="fas fa-save mr-2"></i>Enregistrer
-                </button>
+            <!-- Description -->
+            <div class="form-group">
+                <label class="block mb-2 text-gray-700 font-medium">
+                    <i class="fas fa-align-left text-blue-600 mr-2"></i>Description
+                </label>
+                <textarea name="description" 
+                          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" 
+                          rows="3" disabled>{{ $settings->description ?? '' }}</textarea>
             </div>
-        </form>
-    </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="block mb-2 text-gray-700 font-medium">
+                    <i class="fas fa-envelope text-blue-600 mr-2"></i>Email
+                </label>
+                <input type="email" name="email" value="{{ $settings->email ?? '' }}"
+                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+            </div>
+
+            <!-- NINEA -->
+            <div class="form-group">
+                <label class="block mb-2 text-gray-700 font-medium">
+                    <i class="fas fa-id-card text-blue-600 mr-2"></i>NINEA
+                </label>
+                <input type="text" name="ninea" value="{{ $settings->ninea ?? '' }}"
+                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+            </div>
+
+            <!-- Adresse -->
+            <div class="form-group">
+                <label class="block mb-2 text-gray-700 font-medium">
+                    <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Adresse
+                </label>
+                <input type="text" name="address" value="{{ $settings->address ?? '' }}"
+                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="form-group">
+                <label class="block mb-2 text-gray-700 font-medium">
+                    <i class="fas fa-phone text-blue-600 mr-2"></i>Téléphone
+                </label>
+                <input type="text" name="phone" value="{{ $settings->phone ?? '' }}"
+                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+            </div>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <div class="mt-8 text-center">
+            <button type="submit" id="submitBtn" 
+                    class="px-8 py-3 bg-gray-400 text-white rounded-lg font-bold cursor-not-allowed transition-all"
+                    disabled>
+                <i class="fas fa-save mr-2"></i>Enregistrer
+            </button>
+        </div>
+    </form>
 </div>
+</div>
+
 
 <script>
     function openAuthModal() {
@@ -146,27 +166,27 @@
     }
 
     function enableForm() {
-        // Activer les champs
-        document.querySelectorAll('#settingsForm input[type="text"]').forEach(input => {
-            input.disabled = false;
-            input.classList.replace('bg-gray-50', 'bg-white');
-            input.classList.add('hover:border-gray-300');
-        });
+    // Activer tous les champs du formulaire
+    document.querySelectorAll('#settingsForm input, #settingsForm textarea').forEach(input => {
+        input.disabled = false;
+        input.classList.replace('bg-gray-50', 'bg-white');
+        input.classList.add('hover:border-gray-300');
+    });
 
-        // Activer le bouton de soumission
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('cursor-not-allowed');
-        submitBtn.classList.replace('bg-gray-400', 'bg-green-600');
-        submitBtn.classList.add('hover:bg-green-700', 'shadow-md');
+    // Activer le bouton de soumission
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('cursor-not-allowed');
+    submitBtn.classList.replace('bg-gray-400', 'bg-green-600');
+    submitBtn.classList.add('hover:bg-green-700', 'shadow-md');
 
-        // Ajouter un gestionnaire d'événements au formulaire
-        const form = document.getElementById('settingsForm');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            submitForm();
-        });
-    }
+    // Ajouter un gestionnaire d'événements au formulaire
+    const form = document.getElementById('settingsForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm();
+    });
+}
 
     function submitForm() {
     const form = document.getElementById('settingsForm');

@@ -11,6 +11,8 @@ class Setting extends Model
 
     protected $fillable = [
         'name',
+        'description', // Ajouté
+        'email',     // Ajouté
         'address',
         'phone',
         'ninea',
