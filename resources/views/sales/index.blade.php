@@ -353,374 +353,398 @@
 </div>
 
 <script>
-// Variables globales
-let products = @json($products);
-let selectedProducts = new Set();
-let selectedEditProducts = new Set();
-
-function toggleFilters() {
-    const filters = document.getElementById('advancedFilters');
-    filters.classList.toggle('hidden');
-}
-
-// Gestion du modal de vente
-function openSaleModal() {
-   document.getElementById('saleModal').classList.remove('hidden');
-   document.body.style.overflow = 'hidden';
-   addProductRow();
-}
-
-function closeSaleModal() {
-   document.getElementById('saleModal').classList.add('hidden');
-   document.body.style.overflow = 'auto';
-   document.getElementById('saleForm').reset();
-   document.getElementById('productsContainer').innerHTML = '';
-   selectedProducts.clear();
-   document.getElementById('noProducts').style.display = 'block';
-   document.getElementById('submitSaleBtn').disabled = true;
-}
-
-// Gestion des produits
-function addProductRow() {
-   const template = document.getElementById('productRowTemplate');
-   const container = document.getElementById('productsContainer');
-   const clone = template.content.cloneNode(true);
-   container.appendChild(clone);
-   
-   document.getElementById('noProducts').style.display = 'none';
-   updateSubmitButton();
-}
-
-function searchProducts(input) {
-   const searchTerm = input.value.toLowerCase();
-   const row = input.closest('.product-row');
-   const suggestionsDiv = row.querySelector('.product-suggestions');
-   
-   if (searchTerm.length < 2) {
-       suggestionsDiv.classList.add('hidden');
-       return;
-   }
-
-   const availableProducts = products.filter(p => 
-       !selectedProducts.has(p.id) && 
-       (p.name.toLowerCase().includes(searchTerm) || 
-        p.reference.toLowerCase().includes(searchTerm))
-   );
-
-   suggestionsDiv.innerHTML = availableProducts.map(p => `
-       <div class="suggestion p-2 hover:bg-gray-100 cursor-pointer" 
-           onclick="selectProduct(this, ${p.id}, '${p.name}', ${p.price}, ${p.quantity})">
-           <div class="font-medium">${p.name}</div>
-           <div class="text-sm text-gray-500">
-               Ref: ${p.reference} - Stock: ${p.quantity}
-           </div>
-       </div>
-   `).join('');
-
-   suggestionsDiv.classList.remove('hidden');
-}
-
-function selectProduct(element, id, name, price, stock) {
-    const row = element.closest('.product-row');
-    const input = row.querySelector('input[type="text"]');
-    const quantityInput = row.querySelector('input[name="quantity"]');
-    const unitPrice = row.querySelector('.unit-price');
+    const globalState = {
+        products: @json($products),
+        selectedProducts: new Set(),
+        selectedEditProducts: new Set()
+    };
     
-    input.value = name;
-    input.dataset.productId = id;
-    input.dataset.price = price;
-    input.dataset.stock = stock;
-
-    quantityInput.max = stock;
-    unitPrice.textContent = `${price.toLocaleString('fr-FR')} FCFA/unité`;
-
-    row.querySelector('.product-suggestions').classList.add('hidden');
-    selectedProducts.add(id);
-
-    updateRowTotal(quantityInput);
-    updateSubmitButton();
-}
-
-function updateRowTotal(input) {
-   const row = input.closest('.product-row');
-   const productInput = row.querySelector('input[type="text"]');
-   const quantity = parseInt(input.value);
-   const price = parseFloat(productInput.dataset.price);
-   const stock = parseInt(productInput.dataset.stock);
-   
-   if (quantity > stock) {
-       input.value = stock;
-       alert('Quantité supérieure au stock disponible!');
-       return;
-   }
-   
-   const total = price * quantity;
-   row.querySelector('.row-total').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
-   calculateTotals();
-}
-
-function removeProductRow(button) {
-   const row = button.closest('.product-row');
-   const productId = row.querySelector('input[type="text"]').dataset.productId;
-   if (productId) selectedProducts.delete(parseInt(productId));
-   
-   row.remove();
-   if (document.querySelectorAll('.product-row').length === 0) {
-       document.getElementById('noProducts').style.display = 'block';
-   }
-   calculateTotals();
-   updateSubmitButton();
-}
-
-function calculateTotals() {
-   let subtotal = 0;
-   document.querySelectorAll('.product-row').forEach(row => {
-       const productInput = row.querySelector('input[type="text"]');
-       if (productInput.dataset.productId) {
-           const price = parseFloat(productInput.dataset.price);
-           const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
-           subtotal += price * quantity;
-       }
-   });
-   
-   const taxRate = parseFloat(document.querySelector('[name="tax_rate"]').value) / 100;
-   const tax = subtotal * taxRate;
-   const total = subtotal + tax;
-   
-   document.getElementById('subtotal').textContent = `${subtotal.toLocaleString('fr-FR')} FCFA`;
-   document.getElementById('tax').textContent = `${tax.toLocaleString('fr-FR')} FCFA`;
-   document.getElementById('total').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
-}
-
-function updateSubmitButton() {
-   const hasProducts = document.querySelectorAll('.product-row input[data-product-id]').length > 0;
-   document.getElementById('submitSaleBtn').disabled = !hasProducts;
-}
-
-async function submitSale(event) {
-   event.preventDefault();
-   const submitBtn = document.getElementById('submitSaleBtn');
-   submitBtn.disabled = true;
-   
-   const formData = new FormData(event.target);
-   const items = [];
-   
-   document.querySelectorAll('.product-row').forEach(row => {
-       const productInput = row.querySelector('input[type="text"]');
-       const productId = productInput.dataset.productId;
-       if (productId) {
-           items.push({
-               product_id: productId,
-               quantity: row.querySelector('input[name="quantity"]').value
-           });
-       }
-   });
-   
-   const data = {
-       client_name: formData.get('client_name'),
-       client_phone: formData.get('client_phone'),
-       payment_method: formData.get('payment_method'),
-       notes: formData.get('notes'),
-       tax_rate: formData.get('tax_rate'),
-       items: items
-   };
-   
-   try {
-       const response = await fetch('/sales', {
-           method: 'POST',
-           headers: {
-               'Content-Type': 'application/json',
-               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-           },
-           body: JSON.stringify(data)
-       });
-
-       const result = await response.json();
-       
-       if (response.ok) {
-           closeSaleModal();
-           window.open(`/sales/${result.sale_id}/pdf`, '_blank');
-           location.reload();
-       } else {
-           alert(result.error || 'Erreur lors de l\'enregistrement de la vente');
-           submitBtn.disabled = false;
-       }
-   } catch (error) {
-       console.error('Erreur:', error);
-       alert('Erreur lors de l\'enregistrement de la vente');
-       submitBtn.disabled = false;
-   }
-}
-
-// Fonctions pour l'édition
-function addEditProductRow() {
-   const template = document.getElementById('editProductRowTemplate');
-   const container = document.getElementById('editProductsContainer');
-   const clone = template.content.cloneNode(true);
-   container.appendChild(clone);
-}
-
-function searchEditProducts(input) {
-   const searchTerm = input.value.toLowerCase();
-   const row = input.closest('.product-row');
-   const suggestionsDiv = row.querySelector('.product-suggestions');
-   
-   if (searchTerm.length < 2) {
-       suggestionsDiv.classList.add('hidden');
-       return;
-   }
-
-   const availableProducts = products.filter(p => 
-       !selectedEditProducts.has(p.id) && 
-       (p.name.toLowerCase().includes(searchTerm) || 
-        p.reference.toLowerCase().includes(searchTerm))
-   );
-
-   suggestionsDiv.innerHTML = availableProducts.map(p => `
-       <div class="suggestion p-2 hover:bg-gray-100 cursor-pointer" 
-           onclick="selectEditProduct(this, ${p.id}, '${p.name}', ${p.price}, ${p.quantity})">
-           <div class="font-medium">${p.name}</div>
-           <div class="text-sm text-gray-500">
-               Ref: ${p.reference} - Stock: ${p.quantity}
-           </div>
-       </div>
-   `).join('');
-
-   suggestionsDiv.classList.remove('hidden');
-}
-
-function selectEditProduct(element, id, name, price, stock) {
-    const row = element.closest('.product-row');
-    const input = row.querySelector('input[type="text"]');
-    const quantityInput = row.querySelector('input[name="quantity"]');
-    const unitPrice = row.querySelector('.unit-price');
+    function toggleFilters() {
+        const filters = document.getElementById('advancedFilters');
+        filters.classList.toggle('hidden');
+    }
     
-    input.value = name;
-    input.dataset.productId = id;
-    input.dataset.price = price;
-    input.dataset.stock = stock;
-
-    quantityInput.max = stock;
-    unitPrice.textContent = `${price.toLocaleString('fr-FR')} FCFA/unité`;
-
-    row.querySelector('.product-suggestions').classList.add('hidden');
-    selectedEditProducts.add(id);
-
-    updateEditRowTotal(quantityInput);
-}
-
-function updateEditRowTotal(input) {
-   const row = input.closest('.product-row');
-   const productInput = row.querySelector('input[type="text"]');
-   const quantity = parseInt(input.value);
-   const price = parseFloat(productInput.dataset.price);
-   const stock = parseInt(productInput.dataset.stock);
-   
-   if (quantity > stock) {
-       input.value = stock;
-       alert('Quantité supérieure au stock disponible!');
-       return;
-   }
-   
-   const total = price * quantity;
-   row.querySelector('.row-total').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
-   calculateEditTotals();
-}
-
-function removeEditProductRow(button) {
-    const row = button.closest('.product-row');
-   const productId = row.querySelector('input[type="text"]').dataset.productId;
-   if (productId) selectedEditProducts.delete(parseInt(productId));
-   
-   row.remove();
-   calculateEditTotals();
-}
-
-function calculateEditTotals() {
-   let subtotal = 0;
-   document.querySelectorAll('#editProductsContainer .product-row').forEach(row => {
-       const productInput = row.querySelector('input[type="text"]');
-       if (productInput.dataset.productId) {
-           const price = parseFloat(productInput.dataset.price);
-           const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
-           subtotal += price * quantity;
-       }
-   });
-   
-   const taxRate = parseFloat(document.querySelector('#editSaleForm [name="tax_rate"]').value) / 100;
-   const tax = subtotal * taxRate;
-   const total = subtotal + tax;
-   
-   document.getElementById('editSubtotal').textContent = `${subtotal.toLocaleString('fr-FR')} FCFA`;
-   document.getElementById('editTax').textContent = `${tax.toLocaleString('fr-FR')} FCFA`;
-   document.getElementById('editTotal').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
-}
-
-// Modal d'édition
-async function openEditModal(saleId) {
-    try {
-        const response = await fetch(`/sales/${saleId}/edit`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+    // Gestion du modal de vente
+    function openSaleModal() {
+        document.getElementById('saleModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        addProductRow();
+    }
+    
+    function closeSaleModal() {
+        document.getElementById('saleModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        document.getElementById('saleForm').reset();
+        document.getElementById('productsContainer').innerHTML = '';
+        globalState.selectedProducts.clear();
+        document.getElementById('noProducts').style.display = 'block';
+        document.getElementById('submitSaleBtn').disabled = true;
+    }
+    
+    // Gestion des produits
+    function addProductRow() {
+        const template = document.getElementById('productRowTemplate');
+        const container = document.getElementById('productsContainer');
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone);
+        document.getElementById('noProducts').style.display = 'none';
+        updateSubmitButton();
+    }
+    
+    function searchProducts(input) {
+        const searchTerm = input.value.toLowerCase();
+        const row = input.closest('.product-row');
+        const suggestionsDiv = row.querySelector('.product-suggestions');
+        
+        if (searchTerm.length < 2) {
+            suggestionsDiv.classList.add('hidden');
+            return;
+        }
+    
+        const availableProducts = globalState.products.filter(p => 
+            !globalState.selectedProducts.has(p.id) && 
+            (p.name.toLowerCase().includes(searchTerm) || 
+            p.reference.toLowerCase().includes(searchTerm))
+        );
+    
+        suggestionsDiv.innerHTML = availableProducts.map(p => `
+            <div class="suggestion p-2 hover:bg-gray-100 cursor-pointer" 
+                onclick="selectProduct(this, ${p.id}, '${p.name}', ${p.price}, ${p.quantity})">
+                <div class="font-medium">${p.name}</div>
+                <div class="text-sm text-gray-500">
+                    Ref: ${p.reference} - Stock: ${p.quantity}
+                </div>
+            </div>
+        `).join('');
+    
+        suggestionsDiv.classList.remove('hidden');
+    }
+    
+    function selectProduct(element, id, name, price, stock) {
+        const row = element.closest('.product-row');
+        const input = row.querySelector('input[type="text"]');
+        const quantityInput = row.querySelector('input[name="quantity"]');
+        const unitPrice = row.querySelector('.unit-price');
+        
+        input.value = name;
+        input.dataset.productId = id;
+        input.dataset.price = price;
+        input.dataset.stock = stock;
+    
+        quantityInput.max = stock;
+        unitPrice.textContent = `${price.toLocaleString('fr-FR')} FCFA/unité`;
+    
+        row.querySelector('.product-suggestions').classList.add('hidden');
+        globalState.selectedProducts.add(id);
+    
+        updateRowTotal(quantityInput);
+        updateSubmitButton();
+    }
+    
+    function updateRowTotal(input) {
+        const row = input.closest('.product-row');
+        const productInput = row.querySelector('input[type="text"]');
+        const quantity = parseInt(input.value);
+        const price = parseFloat(productInput.dataset.price);
+        const stock = parseInt(productInput.dataset.stock);
+        
+        if (quantity > stock) {
+            Swal.fire({
+                title: 'Stock insuffisant',
+                text: `Le stock disponible est de ${stock} unités`,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            input.value = stock;
+            return;
+        }
+        
+        const total = price * quantity;
+        row.querySelector('.row-total').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
+        calculateTotals();
+    }
+    
+    function removeProductRow(button) {
+        const row = button.closest('.product-row');
+        const productId = row.querySelector('input[type="text"]').dataset.productId;
+        if (productId) globalState.selectedProducts.delete(parseInt(productId));
+        
+        row.remove();
+        if (document.querySelectorAll('.product-row').length === 0) {
+            document.getElementById('noProducts').style.display = 'block';
+        }
+        calculateTotals();
+        updateSubmitButton();
+    }
+    
+    function calculateTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('.product-row').forEach(row => {
+            const productInput = row.querySelector('input[type="text"]');
+            if (productInput.dataset.productId) {
+                const price = parseFloat(productInput.dataset.price);
+                const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
+                subtotal += price * quantity;
             }
         });
         
-        if (!response.ok) throw new Error('Erreur lors du chargement du formulaire');
+        const taxRate = parseFloat(document.querySelector('[name="tax_rate"]').value) / 100;
+        const tax = subtotal * taxRate;
+        const total = subtotal + tax;
         
-        const content = await response.text();
-        document.getElementById('editSaleContent').innerHTML = content;
-        document.getElementById('editSaleModal').classList.remove('hidden');
-        document.getElementById('editSaleForm').setAttribute('data-sale-id', saleId); // Ajoutez cette ligne
-        document.body.style.overflow = 'hidden';
-
-        initializeEditForm();
-    } catch (error) {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors du chargement du formulaire d\'édition');
+        document.getElementById('subtotal').textContent = `${subtotal.toLocaleString('fr-FR')} FCFA`;
+        document.getElementById('tax').textContent = `${tax.toLocaleString('fr-FR')} FCFA`;
+        document.getElementById('total').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
     }
-}
-
-function initializeEditForm() {
-    // Initialiser les produits sélectionnés
-    document.querySelectorAll('#editProductsContainer .product-row input[type="text"]').forEach(input => {
-        if (input.dataset.productId) {
-            selectedEditProducts.add(parseInt(input.dataset.productId));
-            input.addEventListener('input', function() {
-                searchEditProducts(this);
+    
+    function updateSubmitButton() {
+        const hasProducts = document.querySelectorAll('.product-row input[data-product-id]').length > 0;
+        document.getElementById('submitSaleBtn').disabled = !hasProducts;
+    }
+    
+    async function submitSale(event) {
+        event.preventDefault();
+        const submitBtn = document.getElementById('submitSaleBtn');
+        submitBtn.disabled = true;
+        
+        try {
+            const formData = new FormData(event.target);
+            const items = [];
+            
+            document.querySelectorAll('.product-row').forEach(row => {
+                const productInput = row.querySelector('input[type="text"]');
+                const productId = productInput.dataset.productId;
+                if (productId) {
+                    items.push({
+                        product_id: productId,
+                        quantity: row.querySelector('input[name="quantity"]').value
+                    });
+                }
+            });
+            
+            const data = {
+                client_name: formData.get('client_name'),
+                client_phone: formData.get('client_phone'),
+                payment_method: formData.get('payment_method'),
+                notes: formData.get('notes'),
+                tax_rate: formData.get('tax_rate'),
+                items: items
+            };
+            
+            const response = await fetch('/sales', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(data)
+            });
+    
+            const result = await response.json();
+            
+            if (response.ok) {
+                closeSaleModal();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès',
+                    text: 'Vente enregistrée avec succès',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                window.open(`/sales/${result.sale_id}/pdf`, '_blank');
+                location.reload();
+            } else {
+                throw new Error(result.error || 'Erreur lors de l\'enregistrement de la vente');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message || 'Une erreur est survenue'
+            });
+        } finally {
+            submitBtn.disabled = false;
+        }
+    }
+    
+    function addEditProductRow() {
+        const template = document.getElementById('editProductRowTemplate');
+        const container = document.getElementById('editProductsContainer');
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone);
+    }
+    
+    function searchEditProducts(input) {
+        const searchTerm = input.value.toLowerCase();
+        const row = input.closest('.product-row');
+        const suggestionsDiv = row.querySelector('.product-suggestions');
+        
+        if (searchTerm.length < 2) {
+            suggestionsDiv.classList.add('hidden');
+            return;
+        }
+    
+        const availableProducts = globalState.products.filter(p => 
+            !globalState.selectedEditProducts.has(p.id) && 
+            (p.name.toLowerCase().includes(searchTerm) || 
+            p.reference.toLowerCase().includes(searchTerm))
+        );
+    
+        suggestionsDiv.innerHTML = availableProducts.map(p => `
+            <div class="suggestion p-2 hover:bg-gray-100 cursor-pointer" 
+                onclick="selectEditProduct(this, ${p.id}, '${p.name}', ${p.price}, ${p.quantity})">
+                <div class="font-medium">${p.name}</div>
+                <div class="text-sm text-gray-500">
+                    Ref: ${p.reference} - Stock: ${p.quantity}
+                </div>
+            </div>
+        `).join('');
+    
+        suggestionsDiv.classList.remove('hidden');
+    }
+    
+    function selectEditProduct(element, id, name, price, stock) {
+        const row = element.closest('.product-row');
+        const input = row.querySelector('input[type="text"]');
+        const quantityInput = row.querySelector('input[name="quantity"]');
+        const unitPrice = row.querySelector('.unit-price');
+        
+        input.value = name;
+        input.dataset.productId = id;
+        input.dataset.price = price;
+        input.dataset.stock = stock;
+    
+        quantityInput.max = stock;
+        unitPrice.textContent = `${price.toLocaleString('fr-FR')} FCFA/unité`;
+    
+        row.querySelector('.product-suggestions').classList.add('hidden');
+        globalState.selectedEditProducts.add(id);
+    
+        updateEditRowTotal(quantityInput);
+    }
+    
+    function updateEditRowTotal(input) {
+        const row = input.closest('.product-row');
+        const productInput = row.querySelector('input[type="text"]');
+        const quantity = parseInt(input.value);
+        const price = parseFloat(productInput.dataset.price);
+        const stock = parseInt(productInput.dataset.stock);
+        
+        if (quantity > stock) {
+            Swal.fire({
+                title: 'Stock insuffisant',
+                text: `Le stock disponible est de ${stock} unités`,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            input.value = stock;
+            return;
+        }
+        
+        const total = price * quantity;
+        row.querySelector('.row-total').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
+        calculateEditTotals();
+    }
+    
+    function removeEditProductRow(button) {
+        const row = button.closest('.product-row');
+        const productId = row.querySelector('input[type="text"]').dataset.productId;
+        if (productId) globalState.selectedEditProducts.delete(parseInt(productId));
+        
+        row.remove();
+        calculateEditTotals();
+    }
+    
+    function calculateEditTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('#editProductsContainer .product-row').forEach(row => {
+            const productInput = row.querySelector('input[type="text"]');
+            if (productInput.dataset.productId) {
+                const price = parseFloat(productInput.dataset.price);
+                const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
+                subtotal += price * quantity;
+            }
+        });
+        
+        const taxRate = parseFloat(document.querySelector('#editSaleForm [name="tax_rate"]').value) / 100;
+        const tax = subtotal * taxRate;
+        const total = subtotal + tax;
+        
+        document.getElementById('editSubtotal').textContent = `${subtotal.toLocaleString('fr-FR')} FCFA`;
+        document.getElementById('editTax').textContent = `${tax.toLocaleString('fr-FR')} FCFA`;
+        document.getElementById('editTotal').textContent = `${total.toLocaleString('fr-FR')} FCFA`;
+    }
+    
+    async function openEditModal(saleId) {
+        try {
+            const response = await fetch(`/sales/${saleId}/edit`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (!response.ok) throw new Error('Erreur lors du chargement du formulaire');
+            
+            const content = await response.text();
+            document.getElementById('editSaleContent').innerHTML = content;
+            document.getElementById('editSaleModal').classList.remove('hidden');
+            document.getElementById('editSaleForm').setAttribute('data-sale-id', saleId);
+            document.body.style.overflow = 'hidden';
+    
+            initializeEditForm();
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Une erreur est survenue lors du chargement du formulaire d\'édition'
             });
         }
-    });
-
-    // Initialiser les écouteurs de quantité
-    document.querySelectorAll('#editProductsContainer input[name="quantity"]').forEach(input => {
-        input.addEventListener('change', function() {
-            updateEditRowTotal(this);
-        });
-        input.addEventListener('keyup', function() {
-            updateEditRowTotal(this);
-        });
-    });
-
-    // Initialiser l'écouteur de TVA
-    const taxInput = document.querySelector('#editSaleForm [name="tax_rate"]');
-    if (taxInput) {
-        taxInput.addEventListener('change', calculateEditTotals);
-        taxInput.addEventListener('keyup', calculateEditTotals);
     }
-
-    // Calculer les totaux initiaux
-    calculateEditTotals();
-}
-
-// Soumission du formulaire d'édition
-document.addEventListener('submit', async function(e) {
-    if (e.target && e.target.id === 'editSaleForm') {
-        e.preventDefault();
+    
+    function initializeEditForm() {
+        document.querySelectorAll('#editProductsContainer .product-row input[type="text"]').forEach(input => {
+            if (input.dataset.productId) {
+                globalState.selectedEditProducts.add(parseInt(input.dataset.productId));
+                input.addEventListener('input', function() {
+                    searchEditProducts(this);
+                });
+            }
+        });
+    
+        document.querySelectorAll('#editProductsContainer input[name="quantity"]').forEach(input => {
+            input.addEventListener('change', function() {
+                updateEditRowTotal(this);
+            });
+            input.addEventListener('keyup', function() {
+                updateEditRowTotal(this);
+            });
+        });
+    
+        const taxInput = document.querySelector('#editSaleForm [name="tax_rate"]');
+        if (taxInput) {
+            taxInput.addEventListener('change', calculateEditTotals);
+            taxInput.addEventListener('keyup', calculateEditTotals);
+        }
+    
+        calculateEditTotals();
+    }
+    
+    function closeEditModal() {
+        document.getElementById('editSaleModal').classList.add('hidden');
+        document.getElementById('editSaleContent').innerHTML = '';
+        document.body.style.overflow = 'auto';
+        globalState.selectedEditProducts.clear();
+    }
+    
+    async function submitEditSale(event) {
+        event.preventDefault();
         
-        const saleId = e.target.getAttribute('data-sale-id');
+        const form = event.target;
+        const saleId = form.getAttribute('data-sale-id');
         const items = [];
         
-        // Récupérer tous les produits
         document.querySelectorAll('#editProductsContainer .product-row').forEach(row => {
             const productInput = row.querySelector('input[type="text"]');
             const productId = productInput.dataset.productId;
@@ -732,192 +756,146 @@ document.addEventListener('submit', async function(e) {
             }
         });
         
-        // Préparer les données
         const data = {
-            client_name: document.querySelector('#editSaleForm [name="client_name"]').value,
-            client_phone: document.querySelector('#editSaleForm [name="client_phone"]').value,
-            payment_method: document.querySelector('#editSaleForm [name="payment_method"]').value,
-            notes: document.querySelector('#editSaleForm [name="notes"]').value,
-            tax_rate: document.querySelector('#editSaleForm [name="tax_rate"]').value,
+            client_name: form.elements['client_name'].value,
+            client_phone: form.elements['client_phone'].value,
+            payment_method: form.elements['payment_method'].value,
+            notes: form.elements['notes'].value,
+            tax_rate: form.elements['tax_rate'].value,
             items: items
         };
-
+    
         try {
             const response = await fetch(`/sales/${saleId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-HTTP-Method-Override': 'PUT'
-                },
-                body: JSON.stringify(data)
-            });
+               'X-HTTP-Method-Override': 'PUT'
+           },
+           body: JSON.stringify(data)
+       });
 
-            if (response.ok) {
-                location.reload();
-            } else {
-                const result = await response.json();
-                alert(result.message || 'Erreur lors de la mise à jour de la vente');
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-            alert('Une erreur est survenue lors de la mise à jour');
-        }
-    }
-});
-
-function closeEditModal() {
-    document.getElementById('editSaleModal').classList.add('hidden');
-    document.getElementById('editSaleContent').innerHTML = '';
-    document.body.style.overflow = 'auto';
-    selectedEditProducts.clear();
+       if (response.ok) {
+           Swal.fire({
+               icon: 'success',
+               title: 'Succès',
+               text: 'Vente mise à jour avec succès',
+               timer: 1500,
+               showConfirmButton: false
+           });
+           closeEditModal();
+           location.reload();
+       } else {
+           const result = await response.json();
+           throw new Error(result.message || 'Erreur lors de la mise à jour');
+       }
+   } catch (error) {
+       Swal.fire({
+           icon: 'error',
+           title: 'Erreur',
+           text: error.message
+       });
+   }
 }
 
-// Ajouter ici la nouvelle fonction
-async function submitEditSale(event) {
-    event.preventDefault(); // Empêcher le rechargement de la page
-    
-    const form = event.target;
-    const saleId = form.getAttribute('data-sale-id');
-    const items = [];
-    
-    // Récupérer les produits
-    document.querySelectorAll('#editProductsContainer .product-row').forEach(row => {
-        const productInput = row.querySelector('input[type="text"]');
-        const productId = productInput.dataset.productId;
-        if (productId) {
-            items.push({
-                product_id: productId,
-                quantity: row.querySelector('input[name="quantity"]').value
-            });
-        }
-    });
-    
-    // Préparer les données
-    const data = {
-        client_name: form.elements['client_name'].value,
-        client_phone: form.elements['client_phone'].value,
-        payment_method: form.elements['payment_method'].value,
-        notes: form.elements['notes'].value,
-        tax_rate: form.elements['tax_rate'].value,
-        items: items
-    };
-
-    try {
-        const response = await fetch(`/sales/${saleId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'X-HTTP-Method-Override': 'PUT' // Spécifier la méthode PUT
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            closeEditModal();
-            location.reload(); // Recharger la page après succès
-        } else {
-            const result = await response.json();
-            alert(result.message || 'Erreur lors de la mise à jour');
-        }
-    } catch (error) {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue');
-    }
+function deleteSale(id) {
+   Swal.fire({
+       title: 'Confirmation',
+       text: 'Cette action est irréversible. Continuer ?',
+       icon: 'warning',
+       showCancelButton: true,
+       confirmButtonColor: '#d33',
+       cancelButtonColor: '#3085d6',
+       confirmButtonText: 'Oui, supprimer',
+       cancelButtonText: 'Annuler'
+   }).then((result) => {
+       if (result.isConfirmed) {
+           fetch(`/sales/${id}`, {
+               method: 'DELETE',
+               headers: {
+                   'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                   'Accept': 'application/json'
+               }
+           })
+           .then(response => response.json())
+           .then(data => {
+               if(data.success) {
+                   Swal.fire({
+                       icon: 'success',
+                       title: 'Succès',
+                       text: data.message,
+                       timer: 1500,
+                       showConfirmButton: false
+                   });
+                   location.reload();
+               } else {
+                   throw new Error(data.message);
+               }
+           })
+           .catch(error => {
+               Swal.fire({
+                   icon: 'error',
+                   title: 'Erreur',
+                   text: error.message || 'Une erreur est survenue'
+               });
+           });
+       }
+   });
 }
 
-
-
-// Modale de détails
 async function showSaleDetails(saleId) {
-    try {
-        const response = await fetch(`/sales/${saleId}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        
-        if (!response.ok) throw new Error('Erreur lors du chargement des détails');
-        
-        const content = await response.text();
-        document.getElementById('showSaleContent').innerHTML = content;
-        document.getElementById('showSaleModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    } catch (error) {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors du chargement des détails');
-    }
+   try {
+       const response = await fetch(`/sales/${saleId}`, {
+           headers: {
+               'X-Requested-With': 'XMLHttpRequest'
+           }
+       });
+       
+       if (!response.ok) throw new Error('Erreur lors du chargement des détails');
+       
+       const content = await response.text();
+       document.getElementById('showSaleContent').innerHTML = content;
+       document.getElementById('showSaleModal').classList.remove('hidden');
+       document.body.style.overflow = 'hidden';
+   } catch (error) {
+       Swal.fire({
+           icon: 'error',
+           title: 'Erreur',
+           text: 'Une erreur est survenue lors du chargement des détails'
+       });
+   }
 }
 
 function closeShowModal() {
-    document.getElementById('showSaleModal').classList.add('hidden');
-    document.getElementById('showSaleContent').innerHTML = '';
-    document.body.style.overflow = 'auto';
-}
-
-// Suppression d'une vente
-// Dans la section scripts
-function deleteSale(saleId) {
-    Swal.fire({
-        title: 'Êtes-vous sûr?',
-        text: "Cette vente sera définitivement supprimée!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Oui, supprimer!',
-        cancelButtonText: 'Annuler'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/sales/${saleId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success) {
-                    Swal.fire('Supprimé!', data.message, 'success');
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    Swal.fire('Erreur!', data.message, 'error');
-                }
-            })
-            .catch(error => {
-                Swal.fire('Erreur!', 'Une erreur est survenue', 'error');
-            });
-        }
-    });
+   document.getElementById('showSaleModal').classList.add('hidden');
+   document.getElementById('showSaleContent').innerHTML = '';
+   document.body.style.overflow = 'auto';
 }
 
 // Gestionnaires d'événements globaux
 document.addEventListener('DOMContentLoaded', function() {
-    // Fermer les suggestions lors d'un clic à l'extérieur
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.product-row')) {
-            document.querySelectorAll('.product-suggestions').forEach(div => {
-                div.classList.add('hidden');
-            });
-        }
-    });
+   document.addEventListener('click', function(e) {
+       if (!e.target.closest('.product-row')) {
+           document.querySelectorAll('.product-suggestions').forEach(div => {
+               div.classList.add('hidden');
+           });
+       }
+   });
 
-    // Fermer les modales avec Échap
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeShowModal();
-            closeEditModal();
-            closeSaleModal();
-        }
-    });
+   document.addEventListener('keydown', function(e) {
+       if (e.key === 'Escape') {
+           closeShowModal();
+           closeEditModal();
+           closeSaleModal();
+       }
+   });
 
-    // Empêcher la fermeture lors du clic dans la modale
-    document.querySelectorAll('#showSaleModal .bg-white, #editSaleModal .bg-white').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
+   document.querySelectorAll('#showSaleModal .bg-white, #editSaleModal .bg-white').forEach(modal => {
+       modal.addEventListener('click', function(e) {
+           e.stopPropagation();
+       });
+   });
 });
 </script>
 @endsection
