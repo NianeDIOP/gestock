@@ -2,58 +2,82 @@
 @section('title', 'Liste des catégories')
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4">
-   <div class="flex justify-between items-center mb-6">
-       <h2 class="text-2xl font-bold text-gray-800">Liste des catégories</h2>
-       <div class="flex space-x-3">
-           <a href="{{ route('categories.export.pdf') }}" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex items-center">
-               <i class="fas fa-file-pdf mr-2"></i>Exporter la liste
-           </a>
-           <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-               <i class="fas fa-plus mr-2"></i>Ajouter une catégorie
-           </button>
-       </div>
-   </div>
+<div class="container mx-auto px-4 py-6">
+    <!-- En-tête avec titre et boutons -->
+    <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow">
+        <h2 class="text-2xl font-bold text-gray-800">Liste des catégories</h2>
+        <div class="flex space-x-3">
+            <a href="{{ route('categories.export.pdf') }}" 
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors flex items-center">
+                <i class="fas fa-file-pdf mr-2"></i>Exporter PDF
+            </a>
+            <button onclick="openAddModal()" 
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center">
+                <i class="fas fa-plus mr-2"></i>Nouvelle catégorie
+            </button>
+        </div>
+    </div>
 
-   <div class="bg-white border rounded-lg">
-       <div class="overflow-x-auto">
-           <table class="w-full">
-               <thead class="bg-gray-50">
-                   <tr>
-                       <th class="px-6 py-3 text-left text-gray-700 font-semibold">Nom</th>
-                       <th class="px-6 py-3 text-left text-gray-700 font-semibold">Description</th>
-                       <th class="px-6 py-3 text-right text-gray-700 font-semibold">Actions</th>
-                   </tr>
-               </thead>
-               <tbody class="divide-y divide-gray-200">
-                   @forelse ($categories as $category)
-                       <tr class="hover:bg-gray-50">
-                           <td class="px-6 py-4">{{ $category->name }}</td>
-                           <td class="px-6 py-4">{{ $category->description ?? 'Aucune description' }}</td>
-                           <td class="px-6 py-4 text-right space-x-2">
-                               <button onclick="openEditModal({{ $category->id }}, '{{ $category->name }}', '{{ $category->description }}')" 
-                                   class="text-blue-600 hover:text-blue-800">
-                                   <i class="fas fa-edit"></i>
-                               </button>
-                               <button onclick="confirmDelete({{ $category->id }})" class="text-red-600 hover:text-red-800">
-                                   <i class="fas fa-trash"></i>
-                               </button>
-                           </td>
-                       </tr>
-                   @empty
-                       <tr>
-                           <td colspan="3" class="px-6 py-4 text-center text-gray-500">Aucune catégorie trouvée</td>
-                       </tr>
-                   @endforelse
-               </tbody>
-           </table>
-       </div>
+    <!-- Table principale -->
+    <div class="bg-white rounded-lg shadow">
+        <table class="min-w-full table-fixed">
+            <thead>
+                <tr class="bg-gray-50 border-b">
+                    <th class="w-1/3 px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider uppercase">
+                        Nom
+                    </th>
+                    <th class="w-1/2 px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider uppercase">
+                        Description
+                    </th>
+                    <th class="w-1/6 px-6 py-4 text-right text-sm font-semibold text-gray-600 tracking-wider uppercase">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white">
+                @forelse ($categories as $category)
+                    <tr class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                            {{ $category->name }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {{ $category->description ?? 'Aucune description' }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end space-x-3">
+                                <button onclick="openEditModal({{ $category->id }}, '{{ $category->name }}', '{{ $category->description }}')" 
+                                    class="text-blue-600 hover:text-blue-800 transition-colors">
+                                    <i class="fas fa-edit fa-lg"></i>
+                                </button>
+                                <button onclick="confirmDelete({{ $category->id }})" 
+                                    class="text-red-600 hover:text-red-800 transition-colors">
+                                    <i class="fas fa-trash fa-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-folder-open text-gray-400 text-4xl mb-3"></i>
+                                <p class="text-gray-500 text-lg">Aucune catégorie trouvée</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
 
-       <div class="px-6 py-3 border-t">
-           {{ $categories->links() }}
-       </div>
-   </div>
+        @if($categories->hasPages())
+            <div class="border-t px-6 py-4">
+                {{ $categories->links() }}
+            </div>
+        @endif
+    </div>
 </div>
+
+<!-- Le reste du code (modales) reste identique -->
 
 <!-- Modal Ajout -->
 <div id="addModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
