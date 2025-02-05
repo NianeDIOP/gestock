@@ -139,15 +139,12 @@
 </div>
 
 <script>
-function openAddModal() {
-   document.getElementById('addModal').classList.remove('hidden');
-}
+
 
 // Modifer les fonctions des modales
 function openAddModal() {
     document.getElementById('addModal').classList.remove('hidden');
-    document.getElementById('addName').value = '';
-    document.getElementById('addDescription').value = '';
+    document.body.style.overflow = 'hidden'; // Empêcher le scroll
 }
 
 
@@ -156,6 +153,11 @@ function openEditModal(id, name, description) {
     document.getElementById('editDescription').value = description;
     document.getElementById('editForm').action = `/categories/${id}`;
     document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeAddModal() {
+    document.getElementById('addModal').classList.add('hidden');
+    document.body.style.overflow = 'auto'; // Réactiver le scroll
 }
 
 
