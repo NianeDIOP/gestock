@@ -63,6 +63,34 @@
         .notification-exit {
             animation: slideOut 0.3s ease-in;
         }
+
+        @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            min-height: auto;
+            flex-direction: row;
+            overflow-x: auto;
+        }
+        
+        .nav-item {
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        
+        .nav-item a {
+            padding: 0.5rem;
+            margin: 0 0.25rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px; /* Ajustez selon vos besoins */
+        }
+    }
     </style>
     <style>
         /* Sidebar styles */
@@ -142,37 +170,92 @@
 
     <!-- Navbar -->
     <nav class="bg-white shadow-sm py-2">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-lg font-bold flex items-center text-gray-800">
-                <i class="fas fa-warehouse mr-2 text-blue-600"></i> {{ $settings['name'] }}
-            </h1>
-
-            <!-- Dans la section navbar -->
-            <div class="flex items-center gap-4">
-                <button onclick="openSaleModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                    <i class="fas fa-cash-register mr-2"></i>Vente Produit
-                </button>
-                <button onclick="openStockModal()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                    <i class="fas fa-boxes mr-2"></i>Approvisionnement
-                </button>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <p class="text-sm text-gray-800 flex items-center">
-                    <i class="fas fa-map-marker-alt mr-2 text-gray-600"></i> {{ $settings['address'] }}
-                </p>
-                <p class="text-sm text-gray-800 flex items-center">
-                    <i class="fas fa-calendar-alt mr-2 text-gray-600"></i> {{ now()->format('d/m/Y') }}
-                </p>
-                <form action="{{ route('admin.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="flex items-center text-sm text-gray-800 hover:text-blue-600">
-                        <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap items-center justify-between">
+                <!-- Logo et nom -->
+                <div class="flex items-center flex-shrink-0 mr-4">
+                    <h1 class="text-lg font-bold flex items-center text-gray-800">
+                        <i class="fas fa-warehouse mr-2 text-blue-600"></i> 
+                        <span class="hidden md:inline">{{ $settings['name'] }}</span>
+                    </h1>
+                </div>
+    
+                 <!-- Boutons centraux (version mobile) -->
+                <div class="flex items-center gap-2 md:hidden">
+                    <button onclick="openSaleModal()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-cash-register"></i>
                     </button>
-                </form>
+                    <button onclick="openStockModal()" class="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-boxes"></i>
+                    </button>
+                    <button onclick="openMobileMenu()" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+                <!-- Boutons principaux (version desktop) -->
+                <div class="hidden md:flex items-center gap-2 flex-1 justify-center">
+                    <button onclick="openSaleModal()" class="bg-blue-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-blue-700 flex items-center gap-1">
+                        <i class="fas fa-cash-register"></i>
+                        <span class="hidden sm:inline">Vente</span>
+                    </button>
+                    <button onclick="openStockModal()" class="bg-green-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-green-700 flex items-center gap-1">
+                        <i class="fas fa-boxes"></i>
+                        <span class="hidden sm:inline">Stock</span>
+                    </button>
+                </div>
+    
+                <!-- Infos droite (version desktop) -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="hidden lg:flex items-center space-x-4">
+                        <p class="text-sm text-gray-800 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-gray-600"></i>
+                            <span class="hidden xl:inline">{{ $settings['address'] }}</span>
+                        </p>
+                        <p class="text-sm text-gray-800 flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-gray-600"></i>
+                            {{ now()->format('d/m/Y') }}
+                        </p>
+                    </div>
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="flex items-center text-sm text-gray-800 hover:text-blue-600">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            <span class="hidden sm:inline">Déconnexion</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
+    
+    <!-- Menu mobile -->
+    <div id="mobileMenu" class="md:hidden hidden bg-white border-b">
+        <div class="px-4 py-2">
+            <!-- Ajout du nom en haut du menu mobile -->
+            <div class="mb-3 pb-2 border-b">
+                <h2 class="text-lg font-bold text-gray-800">
+                    {{ $settings['name'] }}
+                </h2>
+            </div>
+            
+            <div class="space-y-2">
+                <p class="text-sm text-gray-800">
+                    <i class="fas fa-map-marker-alt mr-2"></i>{{ $settings['address'] }}
+                </p>
+                <p class="text-sm text-gray-800">
+                    <i class="fas fa-calendar-alt mr-2"></i>{{ now()->format('d/m/Y') }}
+                </p>
+                <div class="pt-2 border-t">
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full text-left text-sm text-gray-800 hover:text-blue-600">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Contenu principal -->
     <div class="flex">
@@ -226,29 +309,31 @@
     </div>
 
     <!-- Nouveau pied de page -->
-    <footer class="bg-white shadow-sm py-3 border-t"> <!-- Réduction du padding -->
-    <div class="container mx-auto flex justify-between items-center px-6">
-        <!-- Colonne de gauche - Informations société -->
-        <div class="flex items-center space-x-4"> <!-- Espacement réduit -->
-            <p class="text-xs text-gray-700"> <!-- Taille réduite -->
-                <i class="fas fa-id-card mr-1 text-gray-600"></i> NINEA : {{ $settings['ninea'] }}
-            </p>
-            <p class="text-xs text-gray-700">
-                <i class="fas fa-phone mr-1 text-gray-600"></i> {{ $settings['phone'] }}
-            </p>
+    <footer class="bg-white shadow-sm py-3 border-t">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+                <!-- Colonne gauche -->
+                <div class="flex flex-col md:flex-row items-center space-y-1 md:space-y-0 md:space-x-4 text-center">
+                    <p class="text-xs text-gray-700">
+                        <i class="fas fa-id-card mr-1"></i>NINEA : {{ $settings['ninea'] }}
+                    </p>
+                    <p class="text-xs text-gray-700">
+                        <i class="fas fa-phone mr-1"></i>{{ $settings['phone'] }}
+                    </p>
+                </div>
+    
+                <!-- Colonne droite -->
+                <div class="flex flex-col md:flex-row items-center space-y-1 md:space-y-0 md:space-x-3">
+                    <p class="text-xs text-gray-600">
+                        &copy; {{ date('Y') }} {{ $settings['name'] }}
+                    </p>
+                    <p class="text-xs text-gray-500 italic">
+                        Développé par ni@na-diop
+                    </p>
+                </div>
+            </div>
         </div>
-
-        <!-- Colonne de droite - Copyright et crédits -->
-        <div class="flex items-center space-x-3">
-            <p class="text-xs text-gray-600">
-                &copy; {{ date('Y') }} {{ $settings['name'] }}
-            </p>
-            <p class="text-xs text-gray-500 italic"> <!-- Couleur plus claire -->
-                Développé par ni@na-diop
-            </p>
-        </div>
-    </div>
-</footer>
+    </footer>
 
     <!-- Modal Approvisionnement -->
     <div id="stockModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
@@ -730,6 +815,18 @@
             }
         });
     });
+
+    function openMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+
+// Fermer le menu quand on clique à l'extérieur
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#mobileMenu') && !e.target.closest('button[onclick="openMobileMenu()"]')) {
+        document.getElementById('mobileMenu').classList.add('hidden');
+    }
+});
     </script>
     @stack('scripts')
 </body>
