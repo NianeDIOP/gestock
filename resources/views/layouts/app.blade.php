@@ -11,148 +11,184 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* Styles pour les notifications */
-        .fade-enter {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        
-        .fade-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 300ms, transform 300ms;
-        }
-        
-        .fade-exit {
-            opacity: 1;
-        }
-        
-        .fade-exit-active {
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 300ms, transform 300ms;
+        /* Base */
+        body {
+            min-height: 100vh;
+            background: #f8fafc;
         }
 
-        /* Animation pour les notifications */
-        @keyframes slideIn {
-            from {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-        }
-
-        .notification-enter {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .notification-exit {
-            animation: slideOut 0.3s ease-in;
-        }
-
-        @media (max-width: 768px) {
-        .sidebar {
-            width: 100%;
-            min-height: auto;
-            flex-direction: row;
-            overflow-x: auto;
-        }
-        
-        .nav-item {
-            margin-bottom: 0;
-            flex-shrink: 0;
-        }
-        
-        .nav-item a {
-            padding: 0.5rem;
-            margin: 0 0.25rem;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .truncate {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 120px; /* Ajustez selon vos besoins */
-        }
-    }
-    </style>
-    <style>
-        /* Sidebar styles */
-        .sidebar {
-            background-color: #2d3748;
-            color:rgb(3, 47, 92);
-            font-size: 0.9rem;
+        /* Layout Structure */
+        .wrapper {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             min-height: 100vh;
         }
-        .sidebar:hover {
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: white;
+            z-index: 50;
+            border-bottom: 1px solid #e2e8f0;
         }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 240px;
+            background: #2d3748;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 40;
+        }
+
+        .sidebar-nav {
+            padding: 1rem;
+        }
+
         .nav-item {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
+
         .nav-item a {
             display: flex;
             align-items: center;
             padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-            color: rgb(231, 231, 231);
-            text-decoration: none;
+            color: #e2e8f0;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
         }
+
         .nav-item a:hover {
-            background-color:rgb(39, 95, 192);
-            transform: translateX(5px);
-        }
-        .active {
-            background-color:rgb(10, 110, 79);
-            border-left: 4px solidrgb(1, 33, 59);
-        }
-        .navbar {
-            background: linear-gradient(135deg, rgb(220, 224, 235), #2563eb);
-            padding: 1rem 1.5rem;
-        }
-        .footer-sidebar {
-            background-color: #1a202c;
-            padding: 1rem;
-            text-align: center;
-            margin-top: auto;
+            background: #4a5568;
+            transform: translateX(4px);
         }
 
+        .nav-item a.active {
+            background: #4299e1;
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 64px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 64px);
+            background: white;
+            flex: 1;
+        }
+
+        /* Footer */
         footer {
-        background: linear-gradient(135deg, rgb(220, 224, 235), #2563eb);
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    }
+            margin-left: 240px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 1rem;
+        }
 
-    footer {
-        background: white;
-        border-top: 1px solid #e2e8f0;
-    }
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 60;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-    footer i {
-        font-size: 0.8rem;
-    }
+        /* Mobile Navigation */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 45;
+        }
+
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 35;
+        }
+
+        /* Responsive Media Queries */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.mobile-active {
+                transform: translateX(0);
+            }
+
+            .mobile-overlay.active {
+                display: block;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .mobile-menu.active {
+                display: block;
+            }
+
+            .main-content,
+            footer {
+                margin-left: 0;
+            }
+
+            .desktop-nav {
+                display: none;
+            }
+        }
+
+        /* Large Screens */
+        @media (min-width: 1920px) {
+            .sidebar {
+                width: 280px;
+            }
+
+            .main-content,
+            footer {
+                margin-left: 280px;
+            }
+        }
+
+        /* Utils */
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
     @php
         $settings = Cache::get('settings', [
             'name' => 'Nom de la quincaillerie',
@@ -168,172 +204,162 @@
         $products = App\Models\Product::select('id', 'name', 'reference', 'quantity', 'price')->get();
     @endphp
 
-    <!-- Navbar -->
-    <nav class="bg-white shadow-sm py-2">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-wrap items-center justify-between">
-                <!-- Logo et nom -->
-                <div class="flex items-center flex-shrink-0 mr-4">
-                    <h1 class="text-lg font-bold flex items-center text-gray-800">
-                        <i class="fas fa-warehouse mr-2 text-blue-600"></i> 
-                        <span class="hidden md:inline">{{ $settings['name'] }}</span>
-                    </h1>
+    <div class="wrapper">
+        <!-- Mobile Toggle Button -->
+        <button class="mobile-toggle" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars text-gray-600 text-xl"></i>
+        </button>
+
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+        <!-- Navbar -->
+       <!-- Navbar -->
+       <nav class="navbar">
+        <div class="w-full h-full px-4">
+            <div class="flex items-center justify-between h-full max-w-[2000px] mx-auto">
+                <!-- Logo et nom - Extrême gauche -->
+                <div class="flex items-center">
+                    <i class="fas fa-warehouse text-blue-600 text-xl mr-2"></i>
+                    <span class="font-bold text-gray-800">{{ $settings['name'] }}</span>
                 </div>
     
-                 <!-- Boutons centraux (version mobile) -->
-                <div class="flex items-center gap-2 md:hidden">
-                    <button onclick="openSaleModal()" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
-                        <i class="fas fa-cash-register"></i>
+                <!-- Boutons centraux -->
+                <div class="flex items-center space-x-4">
+                    <button onclick="openSaleModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <i class="fas fa-cash-register mr-2"></i>
+                        <span>Vente</span>
                     </button>
-                    <button onclick="openStockModal()" class="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700">
-                        <i class="fas fa-boxes"></i>
-                    </button>
-                    <button onclick="openMobileMenu()" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-                <!-- Boutons principaux (version desktop) -->
-                <div class="hidden md:flex items-center gap-2 flex-1 justify-center">
-                    <button onclick="openSaleModal()" class="bg-blue-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-blue-700 flex items-center gap-1">
-                        <i class="fas fa-cash-register"></i>
-                        <span class="hidden sm:inline">Vente</span>
-                    </button>
-                    <button onclick="openStockModal()" class="bg-green-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-green-700 flex items-center gap-1">
-                        <i class="fas fa-boxes"></i>
-                        <span class="hidden sm:inline">Stock</span>
+                    <button onclick="openStockModal()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Stock</span>
                     </button>
                 </div>
     
-                <!-- Infos droite (version desktop) -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="hidden lg:flex items-center space-x-4">
-                        <p class="text-sm text-gray-800 flex items-center">
-                            <i class="fas fa-map-marker-alt mr-2 text-gray-600"></i>
-                            <span class="hidden xl:inline">{{ $settings['address'] }}</span>
-                        </p>
-                        <p class="text-sm text-gray-800 flex items-center">
-                            <i class="fas fa-calendar-alt mr-2 text-gray-600"></i>
-                            {{ now()->format('d/m/Y') }}
-                        </p>
-                    </div>
-                    <form action="{{ route('auth.logout') }}" method="POST">
+                <!-- Infos droite -->
+                <div class="flex items-center space-x-6">
+                    <span class="flex items-center text-gray-600">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        {{ $settings['address'] }}
+                    </span>
+                    <span class="flex items-center text-gray-600">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        {{ now()->format('d/m/Y') }}
+                    </span>
+                    <form action="{{ route('auth.logout') }}" method="POST" class="flex">
                         @csrf
-                        <button type="submit" class="flex items-center text-sm text-gray-800 hover:text-blue-600">
+                        <button type="submit" class="flex items-center text-gray-600 hover:text-blue-600">
                             <i class="fas fa-sign-out-alt mr-2"></i>
-                            <span class="hidden sm:inline">Déconnexion</span>
+                            Déconnexion
                         </button>
                     </form>
                 </div>
             </div>
         </div>
     </nav>
-    
-    <!-- Menu mobile -->
-    <div id="mobileMenu" class="md:hidden hidden bg-white border-b">
-        <div class="px-4 py-2">
-            <!-- Ajout du nom en haut du menu mobile -->
-            <div class="mb-3 pb-2 border-b">
-                <h2 class="text-lg font-bold text-gray-800">
-                    {{ $settings['name'] }}
-                </h2>
-            </div>
-            
-            <div class="space-y-2">
-                <p class="text-sm text-gray-800">
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu">
+            <div class="space-y-3">
+                <p class="text-sm text-gray-600">
                     <i class="fas fa-map-marker-alt mr-2"></i>{{ $settings['address'] }}
                 </p>
-                <p class="text-sm text-gray-800">
+                <p class="text-sm text-gray-600">
                     <i class="fas fa-calendar-alt mr-2"></i>{{ now()->format('d/m/Y') }}
                 </p>
                 <div class="pt-2 border-t">
                     <form action="{{ route('auth.logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full text-left text-sm text-gray-800 hover:text-blue-600">
+                        <button type="submit" class="text-sm text-gray-600 hover:text-blue-600">
                             <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
                         </button>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Contenu principal -->
-    <div class="flex">
         <!-- Sidebar -->
-        <div class="sidebar w-60">
-            <nav class="p-4">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
                 <ul>
                     <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                            <i class="fas fa-tachometer-alt mr-6"></i> Tableau de bord
+                        <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Tableau de bord</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('categories.index') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('categories.*') ? 'active' : '' }}">
-                            <i class="fas fa-list mr-6"></i> Catégories
+                        <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                            <i class="fas fa-list"></i>
+                            <span>Catégories</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('products.index') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                            <i class="fas fa-box mr-6"></i> Matériels
+                        <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">
+                            <i class="fas fa-box"></i>
+                            <span>Matériels</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('sales.index') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('sales.*') ? 'active' : '' }}">
-                            <i class="fas fa-file-invoice mr-6"></i> Factures
+                        <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.*') ? 'active' : '' }}">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Factures</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('suppliers.index') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
-                            <i class="fas fa-truck mr-6"></i> Fournisseurs
+                        <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+                            <i class="fas fa-truck"></i>
+                            <span>Fournisseurs</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('quotations.index') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('quotations.*') ? 'active' : '' }}">
-                            <i class="fas fa-file-invoice-dollar mr-6"></i> Devis
+                        <a href="{{ route('quotations.index') }}" class="{{ request()->routeIs('quotations.*') ? 'active' : '' }}">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Devis</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('settings') }}" class="hover:bg-gray-600 rounded-lg transition duration-200 {{ request()->routeIs('settings') ? 'active' : '' }}">
-                            <i class="fas fa-cog mr-6"></i> Paramètres
+                        <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
                         </a>
                     </li>
                 </ul>
             </nav>
-        </div>
+        </aside>
 
-        <!-- Contenu dynamique -->
-        <div class="flex-1 p-6 bg-white shadow-inner">
+        <!-- Main Content -->
+        <main class="main-content">
             @yield('content')
-        </div>
-    </div>
+        </main>
 
-    <!-- Nouveau pied de page -->
-    <footer class="bg-white shadow-sm py-3 border-t">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
-                <!-- Colonne gauche -->
-                <div class="flex flex-col md:flex-row items-center space-y-1 md:space-y-0 md:space-x-4 text-center">
-                    <p class="text-xs text-gray-700">
-                        <i class="fas fa-id-card mr-1"></i>NINEA : {{ $settings['ninea'] }}
-                    </p>
-                    <p class="text-xs text-gray-700">
-                        <i class="fas fa-phone mr-1"></i>{{ $settings['phone'] }}
-                    </p>
-                </div>
-    
-                <!-- Colonne droite -->
-                <div class="flex flex-col md:flex-row items-center space-y-1 md:space-y-0 md:space-x-3">
-                    <p class="text-xs text-gray-600">
-                        &copy; {{ date('Y') }} {{ $settings['name'] }}
-                    </p>
-                    <p class="text-xs text-gray-500 italic">
-                        Développé par ni@na-diop
-                    </p>
+        <!-- Footer -->
+        <footer>
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-600">
+                            <i class="fas fa-id-card mr-1"></i>
+                            NINEA : {{ $settings['ninea'] }}
+                        </span>
+                        <span class="text-sm text-gray-600">
+                            <i class="fas fa-phone mr-1"></i>
+                            {{ $settings['phone'] }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-600">
+                            &copy; {{ date('Y') }} {{ $settings['name'] }}
+                        </span>
+                        <span class="text-sm text-gray-500 italic">
+                            Développé par ni@na-diop
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
+
 
     <!-- Modal Approvisionnement -->
     <div id="stockModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
@@ -530,6 +556,44 @@
             </div>
         </div>
         </template>
+
+        <script>
+            // Mobile Menu Toggle
+            function toggleMobileMenu() {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.querySelector('.mobile-overlay');
+                const mobileMenu = document.querySelector('.mobile-menu');
+                
+                sidebar.classList.toggle('mobile-active');
+                overlay.classList.toggle('active');
+                mobileMenu.classList.toggle('active');
+                
+                document.body.style.overflow = sidebar.classList.contains('mobile-active') ? 'hidden' : '';
+            }
+    
+            // Close mobile menu when clicking links
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        toggleMobileMenu();
+                    }
+                });
+            });
+    
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const overlay = document.querySelector('.mobile-overlay');
+                    const mobileMenu = document.querySelector('.mobile-menu');
+                    
+                    sidebar.classList.remove('mobile-active');
+                    overlay.classList.remove('active');
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        </script>
 
     <script>
         let stockProducts = @json($products);
@@ -827,6 +891,35 @@ document.addEventListener('click', function(e) {
         document.getElementById('mobileMenu').classList.add('hidden');
     }
 });
+
+    function toggleMobileMenu() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.mobile-overlay');
+        
+        sidebar.classList.toggle('mobile-active');
+        overlay.classList.toggle('active');
+        
+        // Bloquer le scroll quand menu ouvert
+        document.body.style.overflow = sidebar.classList.contains('mobile-active') ? 'hidden' : '';
+    }
+
+    // Fermer le menu quand on clique sur un lien
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleMobileMenu();
+            }
+        });
+    });
+
+    // Réinitialiser au redimensionnement
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            document.querySelector('.sidebar').classList.remove('mobile-active');
+            document.querySelector('.mobile-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
     </script>
     @stack('scripts')
 </body>
