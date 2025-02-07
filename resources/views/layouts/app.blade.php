@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         /* Base */
@@ -284,7 +285,7 @@
                     <form action="{{ route('auth.logout') }}" method="POST" class="flex">
                         @csrf
                         <button type="submit" class="flex items-center text-gray-600 hover:text-blue-600">
-                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            <i class="fas fa-sign-out-alt"></i> <!-- Icône seule -->
                         </button>
                     </form>
                 </div>
@@ -306,10 +307,10 @@
 
                 <!-- Déconnexion -->
                 <div class="pt-2 border-t">
-                    <form action="{{ route('auth.logout') }}" method="POST">
+                    <form action="{{ route('auth.logout') }}" method="POST" class="flex">
                         @csrf
-                        <button type="submit" class="text-sm text-gray-600 hover:text-blue-600">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
+                        <button type="submit" class="flex items-center text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-sign-out-alt"></i> <!-- Icône seule -->
                         </button>
                     </form>
                 </div>
@@ -319,48 +320,59 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <ul>
+                <ul class="space-y-2"> <!-- Espacement entre les éléments du menu -->
                     <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Tableau de bord</span>
+                        <a href="{{ route('dashboard') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                            <i class="fas fa-tachometer-alt w-6 text-center"></i>
+                            <span class="ml-3">Tableau de bord</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
-                            <i class="fas fa-list"></i>
-                            <span>Catégories</span>
+                        <a href="{{ route('categories.index') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                            <i class="fas fa-list w-6 text-center"></i>
+                            <span class="ml-3">Catégories</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">
-                            <i class="fas fa-box"></i>
-                            <span>Matériels</span>
+                        <a href="{{ route('products.index') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                            <i class="fas fa-box w-6 text-center"></i>
+                            <span class="ml-3">Matériels</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.*') ? 'active' : '' }}">
-                            <i class="fas fa-file-invoice"></i>
-                            <span>Factures</span>
+                        <a href="{{ route('sales.index') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('sales.*') ? 'active' : '' }}">
+                            <i class="fas fa-file-invoice w-6 text-center"></i>
+                            <span class="ml-3">Factures</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
-                            <i class="fas fa-truck"></i>
-                            <span>Fournisseurs</span>
+                        <a href="{{ route('suppliers.index') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+                            <i class="fas fa-truck w-6 text-center"></i>
+                            <span class="ml-3">Fournisseurs</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('quotations.index') }}" class="{{ request()->routeIs('quotations.*') ? 'active' : '' }}">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                            <span>Devis</span>
+                        <a href="{{ route('quotations.index') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('quotations.*') ? 'active' : '' }}">
+                            <i class="fas fa-file-invoice-dollar w-6 text-center"></i>
+                            <span class="ml-3">Devis</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.index') ? 'active' : '' }}">
-                            <i class="fas fa-cog"></i>
-                            <span>Paramètres</span>
+                        <a href="{{ route('settings.index') }}" class="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('settings.index') ? 'active' : '' }}">
+                            <i class="fas fa-cog w-6 text-center"></i>
+                            <span class="ml-3">Paramètres</span>
                         </a>
+                    </li>
+                
+                    <!-- Bouton de déconnexion (visible uniquement en mobile) -->
+                    <li class="nav-item md:hidden flex items-center p-2">
+                        <form action="{{ route('auth.logout') }}" method="POST" class="flex">
+                            @csrf
+                            <button type="submit" class="flex items-center text-red-600 hover:text-red-800">
+                                <i class="fas fa-sign-out-alt text-2xl"></i> 
+                                <span class="ml-3">Déconnexion</span><!-- Icône en rouge et plus grande -->
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </nav>
