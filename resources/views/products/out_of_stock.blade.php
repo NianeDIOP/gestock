@@ -1,17 +1,19 @@
+<!-- resources/views/products/out-of-stock.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Produits en rupture de stock')
 
 @section('content')
-<div class="container-fluid px-6 py-4 bg-gray-50 min-h-screen">
+<div class="container-fluid px-4 py-6 bg-gray-50 min-h-screen">
+    <!-- En-tête -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Produits en rupture de stock</h1>
             <p class="text-sm text-gray-600">Liste des produits actuellement en rupture de stock</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap gap-3">
             <a href="{{ route('products.index') }}" 
-            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+               class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 whitespace-nowrap">
                 <i class="fas fa-arrow-left mr-2"></i>Retour aux produits
             </a>
             <!-- Filtre par catégorie -->
@@ -24,7 +26,7 @@
                 @endforeach
             </select>
             <!-- Bouton de réapprovisionnement -->
-            <button onclick="openRestockModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <button onclick="openRestockModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap">
                 <i class="fas fa-boxes mr-2"></i>Réapprovisionner
             </button>
         </div>
@@ -36,25 +38,25 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($products as $product)
                         <tr class="hover:bg-gray-50 cursor-pointer" onclick="showProduct({{ $product->id }})">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $product->reference }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $product->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $product->category->name ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $product->reference }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $product->name }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $product->category->name ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">
                                     Rupture
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                 <button onclick="event.stopPropagation(); openRestockModal({{ $product->id }})" class="text-blue-600 hover:text-blue-900">
                                     <i class="fas fa-boxes"></i>
                                 </button>
@@ -65,13 +67,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Aucun produit en rupture de stock</td>
+                            <td colspan="5" class="px-4 py-4 text-center text-gray-500">Aucun produit en rupture de stock</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 border-t">
+        <div class="px-4 py-4 border-t">
             {{ $products->links() }}
         </div>
     </div>
@@ -130,7 +132,7 @@
             </div>
 
             <div class="p-6 space-y-4">
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-600">Référence</label>
                         <p id="modal-reference" class="mt-1 text-gray-900"></p>
@@ -199,8 +201,6 @@ document.getElementById('categoryFilter').addEventListener('change', function() 
     window.location.href = `/products/out-of-stock?category=${categoryId}`;
 });
 
-// Fonctions pour la modale de détail
-// CORRECTION DU SCRIPT (supprimer la duplication)
 async function showProduct(productId) {
     try {
         const response = await fetch(`/products/${productId}`, {
@@ -235,14 +235,12 @@ async function showProduct(productId) {
     }
 }
 
-// UNE SEULE FONCTION DE FERMETURE
 function closeProductModal() {
     const modal = document.getElementById('productModal');
     modal.classList.add('hidden');
     modal.style.display = 'none';
     document.body.classList.remove('overflow-hidden');
 }
-
 
 // Empêche la propagation du clic sur les boutons d'action
 document.querySelectorAll('td.actions button, td.actions a').forEach(element => {
