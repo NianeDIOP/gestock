@@ -5,18 +5,20 @@
 <div class="max-w-3xl mx-auto px-4 py-6">
     <div class="bg-white rounded-lg shadow-md p-5">
         <!-- En-tête -->
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
                 <i class="fas fa-cog text-blue-600 mr-2"></i>Paramètres
             </h2>
-            <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
-                <i class="fas fa-edit mr-2"></i>Modifier
-            </button>
-            <a href="{{ route('users.index') }}" 
-   onclick="openAuthModal(event, '{{ route('users.index') }}')" 
-   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
-    <i class="fas fa-users mr-2"></i>Gestion des utilisateurs
-</a>
+            <div class="flex space-x-2">
+                <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
+                    <i class="fas fa-edit mr-2"></i>Modifier
+                </button>
+                <a href="{{ route('users.index') }}" 
+                   onclick="openAuthModal(event, '{{ route('users.index') }}')" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
+                    <i class="fas fa-users mr-2"></i>Gestion des utilisateurs
+                </a>
+            </div>
         </div>
 
         <!-- Modale de vérification -->
@@ -61,69 +63,71 @@
         </div>
 
        <!-- Formulaire -->
-       <form action="{{ route('settings') }}" method="POST" id="settingsForm">
+       <form action="{{ route('settings.update') }}" method="POST" id="settingsForm">
         @csrf
         <div class="space-y-5">
             <!-- Nom de l'entreprise -->
-            <div class="form-group">
-                <label class="block mb-2 text-gray-700 font-medium">
-                    <i class="fas fa-building text-blue-600 mr-2"></i>Nom de l'entreprise
-                </label>
-                <input type="text" name="name" value="{{ $settings->name ?? '' }}" 
-                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+            <div class="space-y-5">
+                <!-- Nom de l'entreprise -->
+                <div class="form-group">
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-building text-blue-600 mr-2"></i>Nom de l'entreprise
+                    </label>
+                    <input type="text" name="name" value="{{ $settings->name ?? '' }}" 
+                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+                </div>
+            
+                <!-- Description -->
+                <div class="form-group">
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-align-left text-blue-600 mr-2"></i>Description
+                    </label>
+                    <textarea name="description" 
+                              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" 
+                              rows="3" disabled>{{ $settings->description ?? '' }}</textarea>
+                </div>
+            
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-envelope text-blue-600 mr-2"></i>Email
+                    </label>
+                    <input type="email" name="email" value="{{ $settings->email ?? '' }}"
+                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+                </div>
+            
+                <!-- NINEA -->
+                <div class="form-group">
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-id-card text-blue-600 mr-2"></i>NINEA
+                    </label>
+                    <input type="text" name="ninea" value="{{ $settings->ninea ?? '' }}"
+                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+                </div>
+            
+                <!-- Adresse -->
+                <div class="form-group">
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Adresse
+                    </label>
+                    <input type="text" name="address" value="{{ $settings->address ?? '' }}"
+                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+                </div>
+            
+                <!-- Téléphone -->
+                <div class="form-group">
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-phone text-blue-600 mr-2"></i>Téléphone
+                    </label>
+                    <input type="text" name="phone" value="{{ $settings->phone ?? '' }}"
+                           class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
+                </div>
             </div>
-
-            <!-- Description -->
-            <div class="form-group">
-                <label class="block mb-2 text-gray-700 font-medium">
-                    <i class="fas fa-align-left text-blue-600 mr-2"></i>Description
-                </label>
-                <textarea name="description" 
-                          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" 
-                          rows="3" disabled>{{ $settings->description ?? '' }}</textarea>
-            </div>
-
-            <!-- Email -->
-            <div class="form-group">
-                <label class="block mb-2 text-gray-700 font-medium">
-                    <i class="fas fa-envelope text-blue-600 mr-2"></i>Email
-                </label>
-                <input type="email" name="email" value="{{ $settings->email ?? '' }}"
-                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-            </div>
-
-            <!-- NINEA -->
-            <div class="form-group">
-                <label class="block mb-2 text-gray-700 font-medium">
-                    <i class="fas fa-id-card text-blue-600 mr-2"></i>NINEA
-                </label>
-                <input type="text" name="ninea" value="{{ $settings->ninea ?? '' }}"
-                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-            </div>
-
-            <!-- Adresse -->
-            <div class="form-group">
-                <label class="block mb-2 text-gray-700 font-medium">
-                    <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Adresse
-                </label>
-                <input type="text" name="address" value="{{ $settings->address ?? '' }}"
-                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-            </div>
-
-            <!-- Téléphone -->
-            <div class="form-group">
-                <label class="block mb-2 text-gray-700 font-medium">
-                    <i class="fas fa-phone text-blue-600 mr-2"></i>Téléphone
-                </label>
-                <input type="text" name="phone" value="{{ $settings->phone ?? '' }}"
-                       class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg bg-gray-50" disabled>
-            </div>
-        </div>
 
         <!-- Bouton de soumission -->
         <div class="mt-8 text-center">
             <button type="submit" id="submitBtn" 
-                    class="px-8 py-3 bg-gray-400 text-white rounded-lg font-bold cursor-not-allowed transition-all"
+                    class="w-full md:w-auto px-8 py-3 bg-gray-400 text-white rounded-lg font-bold cursor-not-allowed transition-all"
                     disabled>
                 <i class="fas fa-save mr-2"></i>Enregistrer
             </button>

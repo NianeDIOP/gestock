@@ -96,11 +96,11 @@ Route::prefix('products')->group(function () {
 
    // Paramètres
    // Paramètres
-Route::prefix('settings')->group(function () {
-   Route::get('/', [SettingsController::class, 'index'])->name('settings');
-    Route::post('/verify-password', [SettingsController::class, 'verifyPassword'])->name('settings.verify');
-    Route::post('/', [SettingsController::class, 'update'])->name('settings');
-});
+   Route::prefix('settings')->group(function () {
+      Route::get('/', [SettingsController::class, 'index'])->name('settings.index'); // Nom de route corrigé
+      Route::post('/verify-password', [SettingsController::class, 'verifyPassword'])->name('settings.verify');
+      Route::post('/', [SettingsController::class, 'update'])->name('settings.update');
+  });
 
 
 Route::get('/generate-report', [ReportController::class, 'generateReport']);

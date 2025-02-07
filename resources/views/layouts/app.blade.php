@@ -357,7 +357,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">
+                        <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.index') ? 'active' : '' }}">
                             <i class="fas fa-cog"></i>
                             <span>Paramètres</span>
                         </a>
