@@ -92,12 +92,35 @@
             flex: 1;
         }
 
+        .floating-buttons {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 100;
+            display: flex;
+            gap: 0.75rem;
+        }
+        .floating-buttons button {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .floating-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
         /* Footer */
         footer {
             margin-left: 240px;
             background: white;
             border-top: 1px solid #e2e8f0;
-            padding: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
 
         /* Mobile Menu Toggle */
@@ -220,24 +243,23 @@
             <div class="flex items-center justify-between h-full max-w-[2000px] mx-auto">
                 <!-- Logo et nom - Extrême gauche -->
                 <div class="flex items-center">
-                    <i class="fas fa-warehouse text-blue-600 text-xl mr-2"></i>
-                    <span class="font-bold text-gray-800">{{ $settings['name'] }}</span>
+                    <i class="fas fa-warehouse text-blue-800 text-xl mr-2"></i>
+                    <span class="font-bold text-gray-1000">{{ $settings['name'] }}</span>
                 </div>
     
-                <!-- Boutons centraux -->
-                <div class="flex items-center space-x-4">
-                    <button onclick="openSaleModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        <i class="fas fa-cash-register mr-2"></i>
-                        <span>Vente</span>
-                    </button>
-                    <button onclick="openStockModal()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                        <i class="fas fa-boxes mr-2"></i>
-                        <span>Stock</span>
-                    </button>
-                </div>
+                <!-- Infos droite (toutes visibles en desktop, masquées en mobile) -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Téléphone et email -->
+                    <span class="flex items-center text-gray-600">
+                        <i class="fas fa-phone mr-2"></i>
+                        {{ $settings['phone'] }}
+                    </span>
+                    <span class="flex items-center text-gray-600">
+                        <i class="fas fa-envelope mr-2"></i>
+                        {{ $settings['email'] }}
+                    </span>
     
-                <!-- Infos droite -->
-                <div class="flex items-center space-x-6">
+                    <!-- Adresse et date -->
                     <span class="flex items-center text-gray-600">
                         <i class="fas fa-map-marker-alt mr-2"></i>
                         {{ $settings['address'] }}
@@ -246,6 +268,8 @@
                         <i class="fas fa-calendar-alt mr-2"></i>
                         {{ now()->format('d/m/Y') }}
                     </span>
+    
+                    <!-- Déconnexion -->
                     <form action="{{ route('auth.logout') }}" method="POST" class="flex">
                         @csrf
                         <button type="submit" class="flex items-center text-gray-600 hover:text-blue-600">
@@ -254,19 +278,33 @@
                         </button>
                     </form>
                 </div>
+    
+                <!-- Bouton de déconnexion (visible uniquement en mobile) -->
+                <div class="md:hidden flex items-center">
+                    <form action="{{ route('auth.logout') }}" method="POST" class="flex">
+                        @csrf
+                        <button type="submit" class="flex items-center text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
 
         <!-- Mobile Menu -->
+        <!-- Mobile Menu -->
         <div class="mobile-menu">
             <div class="space-y-3">
+                <!-- Téléphone et email -->
                 <p class="text-sm text-gray-600">
-                    <i class="fas fa-map-marker-alt mr-2"></i>{{ $settings['address'] }}
+                    <i class="fas fa-phone mr-2"></i>{{ $settings['phone'] }}
                 </p>
                 <p class="text-sm text-gray-600">
-                    <i class="fas fa-calendar-alt mr-2"></i>{{ now()->format('d/m/Y') }}
+                    <i class="fas fa-envelope mr-2"></i>{{ $settings['email'] }}
                 </p>
+
+                <!-- Déconnexion -->
                 <div class="pt-2 border-t">
                     <form action="{{ route('auth.logout') }}" method="POST">
                         @csrf
@@ -333,20 +371,31 @@
             @yield('content')
         </main>
 
+          <!-- Boutons flottants -->
+        <div class="floating-buttons">
+            <button onclick="openSaleModal()" class="bg-blue-600 text-white">
+                <i class="fas fa-cash-register"></i>
+            </button>
+            <button onclick="openStockModal()" class="bg-green-600 text-white">
+                <i class="fas fa-boxes"></i>
+            </button>
+        </div>
+
         <!-- Footer -->
-        <footer>
-            <div class="container mx-auto px-4">
+        <footer class="bg-white border-t border-gray-200">
+            <div class="container mx-auto px-4 py-3">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex items-center gap-4">
+                    <!-- Numéro et email (visibles uniquement en mobile) -->
+                    <div class="md:hidden flex flex-col items-center space-y-2">
                         <span class="text-sm text-gray-600">
-                            <i class="fas fa-id-card mr-1"></i>
-                            NINEA : {{ $settings['ninea'] }}
+                            <i class="fas fa-phone mr-2"></i>{{ $settings['phone'] }}
                         </span>
                         <span class="text-sm text-gray-600">
-                            <i class="fas fa-phone mr-1"></i>
-                            {{ $settings['phone'] }}
+                            <i class="fas fa-envelope mr-2"></i>{{ $settings['email'] }}
                         </span>
                     </div>
+        
+                    <!-- Copyright et développeur (visibles en desktop et mobile) -->
                     <div class="flex items-center gap-4">
                         <span class="text-sm text-gray-600">
                             &copy; {{ date('Y') }} {{ $settings['name'] }}
