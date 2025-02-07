@@ -222,18 +222,22 @@
         </div>
         <div class="stat-card">
             <div class="stat-label">CA Moyen par Vente</div>
-            <div class="stat-value text-primary">{{ number_format($stockStats['average_sale'], 0, ',', ' ') }} FCFA</div>
+            <div class="stat-value text-primary">
+                {{ number_format($stockStats['average_sale'] ?? 0, 0, ',', ' ') }}
+            </div>
+            
         </div>
     </div>
 
     <!-- Performances de vente -->
     <div class="section page-break">
-        <h2 class="section-title">🚀 Performances Commerciales</h2>
+        <h2 class="section-title"> Performances Commerciales</h2>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Meilleur Jour</div>
                 <div class="stat-value success">{{ number_format($bestDay->total ?? 0, 0, ',', ' ') }} FCFA</div>
-                <div class="stat-trend">{{ $bestDay->date ? Carbon\Carbon::parse($bestDay->date)->format('d/m/Y') : 'N/A' }}</div>
+<div class="stat-trend">{{ isset($bestDay->date) ? Carbon\Carbon::parse($bestDay->date)->format('d/m/Y') : 'N/A' }}</div>
+
             </div>
             <div class="stat-card">
                 <div class="stat-label">Paiements par Carte</div>
@@ -244,7 +248,7 @@
 
     <!-- Analyse par catégorie -->
     <div class="section">
-        <h2 class="section-title">📈 Analyse Financière par Catégorie</h2>
+        <h2 class="section-title">Analyse Financière par Catégorie</h2>
         <div class="table-container">
             <table>
                 <thead>
@@ -271,7 +275,7 @@
 
     <!-- Détails des transactions -->
     <div class="section page-break">
-        <h2 class="section-title">💵 Détail des Transactions</h2>
+        <h2 class="section-title"> Détail des Transactions</h2>
         <div class="table-container">
             <table>
                 <thead>
@@ -298,7 +302,7 @@
 
     <!-- Top des ventes -->
     <div class="section">
-        <h2 class="section-title">🏆 Top 10 des Produits les Plus Vendus</h2>
+        <h2 class="section-title"> Top 10 des Produits les Plus Vendus</h2>
         <div class="table-container">
             <table>
                 <thead>
@@ -318,7 +322,7 @@
                             <strong>{{ $product->name }}</strong><br>
                             <span class="text-sm text-gray-500">{{ $product->reference }}</span>
                         </td>
-                        <td>{{ $product->category->name }}</td>
+                        <td>{{ $product->category ? $product->category->name : 'Aucune catégorie' }}</td>
                         <td>{{ number_format($product->total_sold, 0, ',', ' ') }}</td>
                         <td>{{ number_format($product->total_revenue, 0, ',', ' ') }} FCFA</td>
                         <td>{{ $product->quantity }}</td>
@@ -342,7 +346,7 @@
 
     <!-- Alertes de stock -->
     <div class="section">
-        <h2 class="section-title">⚠️ Alertes de Stock</h2>
+        <h2 class="section-title"> Alertes de Stock</h2>
         <div class="table-container">
             <table>
                 <thead>
@@ -360,7 +364,7 @@
                     <tr>
                         <td>{{ $product->reference }}</td>
                         <td><strong>{{ $product->name }}</strong></td>
-                        <td>{{ $product->category->name }}</td>
+                        <td>{{ $product->category ? $product->category->name : 'Aucune catégorie' }}</td>
                         <td>{{ $product->quantity }}</td>
                         <td>{{ $product->stock_threshold }}</td>
                         <td>{{ $product->last_restock_date ? $product->last_restock_date->format('d/m/Y') : 'N/A' }}</td>
@@ -373,7 +377,7 @@
 
     <!-- Inventaire détaillé -->
     <div class="section">
-        <h2 class="section-title">📦 Inventaire Détaillé</h2>
+        <h2 class="section-title">Inventaire Détaillé</h2>
         <div class="table-container">
             <table>
                 <thead>

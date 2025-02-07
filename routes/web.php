@@ -53,7 +53,8 @@ Route::prefix('products')->group(function () {
    Route::get('/export/pdf', [ProductController::class, 'exportPdf'])->name('products.export.pdf');
    Route::get('/search', [ProductController::class, 'searchProducts'])->name('products.search');
     // Ajoutez la route generate-report ici
-    Route::get('/generate-report', [ProductController::class, 'generateReport'])->name('products.generate-report');
+    Route::get('/generate-report', [ProductController::class, 'generateReport'])
+    ->name('products.generate.report');
   
     // Routes avec paramètre {product} EN DERNIER
    Route::post('/', [ProductController::class, 'store'])->name('products.store');

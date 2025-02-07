@@ -43,6 +43,11 @@
                     <i class="fas fa-file-pdf mr-2"></i>
                     <span>Exporter PDF</span>
                 </a>
+                <button onclick="openReportModal()" 
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    <span>Générer Rapport</span>
+                </button>
             </div>
         </div>
     </div>
@@ -453,6 +458,75 @@
     </div>
 </div>
 
+<!-- Modal de génération de rapport -->
+<div id="reportModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <!-- Contenu du modal -->
+        <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-chart-bar mr-2 text-purple-600"></i>
+                        Générer un rapport
+                    </h3>
+                    <button type="button" onclick="closeReportModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <form action="{{ route('products.generate.report') }}" method="GET">
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Sélection de la période -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Période <span class="text-red-500">*</span>
+                            </label>
+                            <select name="period" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="day">Jour</option>
+                                <option value="week">Semaine</option>
+                                <option value="month">Mois</option>
+                                <option value="year">Année</option>
+                            </select>
+                        </div>
+
+                        <!-- Sélection de l'année -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Année <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   name="year" 
+                                   value="{{ date('Y') }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                   placeholder="Année">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3 rounded-b-xl">
+                    <button type="button" 
+                            onclick="closeReportModal()"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Annuler
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                        <i class="fas fa-check mr-2"></i>
+                        Générer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
     @push('scripts')
     @push('scripts')
     <script>
@@ -669,6 +743,26 @@
             closeEditModal();
         }
     });
+
+    // Fonctions pour la modale de rapport
+function openReportModal() {
+    document.getElementById('reportModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReportModal() {
+    document.getElementById('reportModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Gestionnaire d'événements pour la touche Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAddModal();
+        closeEditModal();
+        closeReportModal(); // Ajouter cette ligne
+    }
+});
     </script>
     @endpush
 @endpush
