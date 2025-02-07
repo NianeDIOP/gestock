@@ -516,11 +516,12 @@
                         <i class="fas fa-times mr-2"></i>
                         Annuler
                     </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
-                        <i class="fas fa-check mr-2"></i>
-                        Générer
-                    </button>
+                    <form action="{{ route('products.generate.report') }}" method="get" target="_blank">
+                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                            <i class="fas fa-check mr-2"></i>
+                            Générer
+                        </button>
+                     </form>
                 </div>
             </form>
         </div>

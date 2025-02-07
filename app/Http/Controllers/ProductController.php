@@ -292,7 +292,12 @@ class ProductController extends Controller
         now()->format('Y-m-d-His')
     );
 
-    return $pdf->stream($filename);
+    return response()->streamDownload(function() use ($pdf) {
+        echo $pdf->stream();
+    }, 'rapport-stock.pdf', [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="rapport-stock.pdf"'
+    ]);
 }
 
 private function getDateRange($period, $year)
