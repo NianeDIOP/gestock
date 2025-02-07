@@ -66,37 +66,65 @@
 
 @if(auth()->user()->isSuperAdmin())
 <!-- Modal d'ajout d'utilisateur -->
+<!-- Modal d'ajout d'utilisateur -->
 <div id="addUserModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
     <div class="flex min-h-screen items-center justify-center p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4">Nouvel utilisateur</h3>
+                <!-- En-tête de la modale -->
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Nouvel utilisateur</h3>
+                    <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Formulaire -->
                 <form id="addUserForm" action="{{ route('users.store') }}" method="POST">
                     @csrf
-                    <div class="space-y-4">
+                    <div class="space-y-6">
+                        <!-- Champ Nom -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nom</label>
-                            <input type="text" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                            <input type="text" name="name" required 
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
                         </div>
+
+                        <!-- Champ Email -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" name="email" required 
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
                         </div>
+
+                        <!-- Champ Mot de passe -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                            <input type="password" name="password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                            <input type="password" name="password" required 
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
                         </div>
+
+                        <!-- Champ Rôle -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Rôle</label>
-                            <select name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
+                            <select name="role" 
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
                                 <option value="admin">Admin</option>
                                 <option value="super_admin">Super Admin</option>
                             </select>
                         </div>
                     </div>
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 border rounded-md">Annuler</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Enregistrer</button>
+
+                    <!-- Boutons de la modale -->
+                    <div class="mt-8 flex justify-end space-x-4">
+                        <button type="button" onclick="closeAddUserModal()" 
+                                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                            Annuler
+                        </button>
+                        <button type="submit" 
+                                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Enregistrer
+                        </button>
                     </div>
                 </form>
             </div>
