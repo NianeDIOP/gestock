@@ -4,13 +4,14 @@
 @section('title', 'Liste des fournisseurs')
 
 @section('content')
-<div class="container px-6 mx-auto">
+<div class="container px-4 mx-auto">
+    <!-- En-tête -->
     <div class="sm:flex sm:items-center sm:justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Liste des fournisseurs</h2>
-        <div class="flex gap-4">
+        <div class="flex gap-4 mt-4 sm:mt-0">
             <a href="#" 
-            onclick="exportList(); return false;" 
-            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm">
+               onclick="exportList(); return false;" 
+               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm">
                 <i class="fas fa-file-download mr-2"></i>
                 Exporter la liste
             </a>
@@ -28,24 +29,24 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email/Téléphone</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email/Téléphone</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($suppliers as $supplier)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $supplier->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $supplier->contact_person ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $supplier->name }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $supplier->contact_person ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <div>{{ $supplier->email ?? '-' }}</div>
                                 <div class="text-gray-400">{{ $supplier->phone ?? '-' }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $supplier->address ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $supplier->address ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                 <button onclick="openEditModal({{ $supplier->id }})" class="text-indigo-600 hover:text-indigo-900">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -60,13 +61,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Aucun fournisseur trouvé</td>
+                            <td colspan="5" class="px-4 py-4 text-center text-gray-500">Aucun fournisseur trouvé</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 border-t">
+        <div class="px-4 py-4 border-t">
             {{ $suppliers->links() }}
         </div>
     </div>
@@ -147,82 +148,82 @@
             </div>
         </div>
     </div>
-    <!-- Ajoutez ce code juste après le modal d'ajout dans la vue index.blade.php -->
 
-<!-- Modal d'édition -->
-<div id="editModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <!-- Overlay -->
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <!-- Modal d'édition -->
+    <div id="editModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <!-- Overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            <div class="px-6 py-4 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Modifier le fournisseur</h3>
-                <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl">
+                <div class="px-6 py-4 border-b">
+                    <h3 class="text-lg font-medium text-gray-900">Modifier le fournisseur</h3>
+                    <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
 
-            <form id="editForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Nom -->
-                        <div class="col-span-2">
-                            <label for="edit_name" class="block text-sm font-medium text-gray-700 mb-1">Nom du fournisseur <span class="text-red-500">*</span></label>
-                            <input type="text" name="name" id="edit_name" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
+                <form id="editForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Nom -->
+                            <div class="col-span-2">
+                                <label for="edit_name" class="block text-sm font-medium text-gray-700 mb-1">Nom du fournisseur <span class="text-red-500">*</span></label>
+                                <input type="text" name="name" id="edit_name" required 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            </div>
 
-                        <!-- Personne contact -->
-                        <div>
-                            <label for="edit_contact_person" class="block text-sm font-medium text-gray-700 mb-1">Personne contact</label>
-                            <input type="text" name="contact_person" id="edit_contact_person" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
+                            <!-- Personne contact -->
+                            <div>
+                                <label for="edit_contact_person" class="block text-sm font-medium text-gray-700 mb-1">Personne contact</label>
+                                <input type="text" name="contact_person" id="edit_contact_person" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label for="edit_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" name="email" id="edit_email" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
+                            <!-- Email -->
+                            <div>
+                                <label for="edit_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" name="email" id="edit_email" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            </div>
 
-                        <!-- Téléphone -->
-                        <div>
-                            <label for="edit_phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                            <input type="tel" name="phone" id="edit_phone" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
+                            <!-- Téléphone -->
+                            <div>
+                                <label for="edit_phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                                <input type="tel" name="phone" id="edit_phone" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            </div>
 
-                        <!-- Adresse -->
-                        <div>
-                            <label for="edit_address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                            <input type="text" name="address" id="edit_address" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                        </div>
+                            <!-- Adresse -->
+                            <div>
+                                <label for="edit_address" class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                                <input type="text" name="address" id="edit_address" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            </div>
 
-                        <!-- Notes -->
-                        <div class="col-span-2">
-                            <label for="edit_notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                            <textarea name="notes" id="edit_notes" rows="3" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"></textarea>
+                            <!-- Notes -->
+                            <div class="col-span-2">
+                                <label for="edit_notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <textarea name="notes" id="edit_notes" rows="3" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"></textarea>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3 rounded-b-lg">
-                    <button type="button" onclick="closeEditModal()" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Annuler
-                    </button>
-                    <button type="submit" 
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Mettre à jour
-                    </button>
-                </div>
-            </form>
+                    <div class="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3 rounded-b-lg">
+                        <button type="button" onclick="closeEditModal()" 
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Annuler
+                        </button>
+                        <button type="submit" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Mettre à jour
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
