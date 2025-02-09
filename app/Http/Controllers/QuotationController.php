@@ -128,49 +128,66 @@ class QuotationController extends Controller
     $pdf = PDF::loadView('quotations.pdf', compact('quotation', 'settings'));
     return $pdf->download('devis-' . $quotation->quotation_number . '.pdf');
     }
-
     public function validateQuotation(Quotation $quotation)
     {
         try {
-            DB::transaction(function() use ($quotation) {
-                // Vérifier d'abord tous les stocks
-                foreach ($quotation->items as $item) {
-                    $product = Product::findOrFail($item->product_id);
-                    if ($product->quantity < $item->quantity) {
-                        throw new \Exception("Stock insuffisant pour {$product->name} (Stock: {$product->quantity}, Demande: {$item->quantity})");
-                    }
+            DB::beginTransaction();
+            
+            // Vérifier le statut du devis
+            if ($quotation->status === 'accepted') {
+                throw new \Exception('Ce devis a déjà été validé.');
+            }
+    
+            // Vérifier d'abord tous les stocks
+            foreach ($quotation->items as $item) {
+                $product = Product::findOrFail($item->product_id);
+                if ($product->quantity < $item->quantity) {
+                    throw new \Exception("Stock insuffisant pour le produit '{$product->name}' (Disponible: {$product->quantity}, Demandé: {$item->quantity})");
                 }
-
-                // Créer la vente seulement si tous les stocks sont OK
-                $sale = Sale::create([
-                    'sale_number' => 'VTE-' . date('Y') . '-' . str_pad(Sale::count() + 1, 4, '0', STR_PAD_LEFT),
-                    'sale_date' => now(),
-                    'client_name' => $quotation->client_name,
-                    'client_phone' => $quotation->client_phone,
-                    'payment_method' => 'cash',
-                    'subtotal' => $quotation->subtotal,
-                    'tax' => $quotation->tax,
-                    'total' => $quotation->total
+            }
+    
+            // Créer la vente
+            $sale = Sale::create([
+                'sale_number' => 'VTE-' . date('Y') . '-' . str_pad(Sale::count() + 1, 4, '0', STR_PAD_LEFT),
+                'sale_date' => now(),
+                'client_name' => $quotation->client_name,
+                'client_phone' => $quotation->client_phone,
+                'payment_method' => 'cash',
+                'payment_status' => 'paid', // Ajout du payment_status
+                'subtotal' => $quotation->subtotal,
+                'tax' => $quotation->tax,
+                'total' => $quotation->total,
+                'notes' => $quotation->notes // Ajout des notes optionnelles
+            ]);
+    
+            // Mettre à jour les stocks et créer les items
+            foreach ($quotation->items as $item) {
+                $product = Product::find($item->product_id);
+                
+                // Double vérification du stock avant décrémentation
+                if ($product->quantity < $item->quantity) {
+                    DB::rollBack();
+                    throw new \Exception("Stock insuffisant pour le produit '{$product->name}'");
+                }
+                
+                $product->decrement('quantity', $item->quantity);
+                
+                $sale->items()->create([
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'subtotal' => $item->subtotal
                 ]);
-
-                // Mettre à jour les stocks et créer les items
-                foreach ($quotation->items as $item) {
-                    $product = Product::find($item->product_id);
-                    $product->decrement('quantity', $item->quantity);
-                    
-                    $sale->items()->create([
-                        'product_id' => $item->product_id,
-                        'quantity' => $item->quantity,
-                        'unit_price' => $item->unit_price,
-                        'subtotal' => $item->subtotal
-                    ]);
-                }
-
-                $quotation->update(['status' => 'accepted']);
-            });
-
-            return response()->json(['success' => true]);
+            }
+    
+            // Mettre à jour le statut du devis
+            $quotation->update(['status' => 'accepted']);
+    
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Devis validé avec succès']);
+    
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'error' => $e->getMessage()
             ], 422);

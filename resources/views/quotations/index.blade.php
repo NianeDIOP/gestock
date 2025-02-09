@@ -4,12 +4,13 @@
 
 @section('content')
 <div class="container-fluid px-6 py-6 bg-gray-50">
-    <div class="flex justify-between items-center mb-6">
+    <!-- En-tête -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Gestion des Devis</h2>
-            <p class="text-gray-600">{{ $quotations->count() }} devis enregistrés</p>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Gestion des Devis</h2>
+            <p class="text-sm md:text-base text-gray-600">{{ $quotations->count() }} devis enregistrés</p>
         </div>
-        <button onclick="openQuotationModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <button onclick="openQuotationModal()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
             <i class="fas fa-plus"></i>Nouveau Devis
         </button>
     </div>
@@ -17,227 +18,191 @@
     <div class="bg-white rounded-lg shadow mb-6">
         <div class="p-4">
             <form action="{{ route('quotations.index') }}" method="GET" class="space-y-4">
-                <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex flex-col gap-4">
+                    <!-- Barre de recherche -->
                     <input type="text" name="search" value="{{ request('search') }}" 
                         placeholder="Rechercher par client ou N°..." 
-                        class="flex-1 px-4 py-2 border rounded-lg">
+                        class="w-full px-4 py-2 border rounded-lg">
                     
-                    <select name="status" class="px-4 py-2 border rounded-lg">
-                        <option value="">Tous les statuts</option>
-                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>En attente</option>
-                        <option value="accepted" {{ request('status') === 'accepted' ? 'selected' : '' }}>Accepté</option>
-                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejeté</option>
-                    </select>
-
-                    <input type="date" name="start_date" value="{{ request('start_date') }}" 
-                        class="px-4 py-2 border rounded-lg">
-                    <input type="date" name="end_date" value="{{ request('end_date') }}" 
-                        class="px-4 py-2 border rounded-lg">
-
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                        <i class="fas fa-filter mr-2"></i>Filtrer
-                    </button>
+                    <!-- Filtres en grille -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <select name="status" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="">Tous les statuts</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>En attente</option>
+                            <option value="accepted" {{ request('status') === 'accepted' ? 'selected' : '' }}>Accepté</option>
+                            <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejeté</option>
+                        </select>
+    
+                        <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                            class="w-full px-4 py-2 border rounded-lg">
+                        <input type="date" name="end_date" value="{{ request('end_date') }}" 
+                            class="w-full px-4 py-2 border rounded-lg">
+    
+                        <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-filter mr-2"></i>Filtrer
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N° Devis</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse ($quotations as $quotation)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4">{{ $quotation->quotation_number }}</td>
-                    <td class="px-6 py-4">{{ $quotation->date->format('d/m/Y') }}</td>
-                    <td class="px-6 py-4">
-                        <div>{{ $quotation->client_name }}</div>
-                        <div class="text-sm text-gray-500">{{ $quotation->client_phone }}</div>
-                    </td>
-                    <td class="px-6 py-4">{{ number_format($quotation->total, 0, ',', ' ') }} FCFA</td>
-                    <td class="px-6 py-4">
-                        <span @class([
-                            'px-2 py-1 text-xs rounded-full',
-                            'bg-yellow-100 text-yellow-800' => $quotation->status === 'pending',
-                            'bg-green-100 text-green-800' => $quotation->status === 'accepted',
-                            'bg-red-100 text-red-800' => $quotation->status === 'rejected'
-                        ])>
-                            {{ $quotation->status }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <button onclick="validateQuotation({{ $quotation->id }})" class="text-green-600 hover:text-green-900">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <a href="{{ route('quotations.pdf', $quotation) }}" class="text-blue-600 hover:text-blue-900">
-                            <i class="fas fa-file-pdf"></i>
-                        </a>
-                        <button onclick="editQuotation({{ $quotation->id }})" class="text-yellow-600 hover:text-yellow-900">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="deleteQuotation({{ $quotation->id }})" class="text-red-600 hover:text-red-900">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Aucun devis trouvé</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+
+   <!-- Vue mobile (cartes) -->
+<div class="block lg:hidden">
+    <div class="space-y-4">
+        @forelse ($quotations as $quotation)
+        <div class="bg-white rounded-lg shadow p-4">
+            <!-- En-tête de la carte -->
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <span class="text-sm font-medium text-gray-900">N° {{ $quotation->quotation_number }}</span>
+                    <p class="text-sm text-gray-500">{{ $quotation->date->format('d/m/Y') }}</p>
+                </div>
+                <span @class([
+                    'px-2 py-1 text-xs rounded-full',
+                    'bg-yellow-100 text-yellow-800' => $quotation->status === 'pending',
+                    'bg-green-100 text-green-800' => $quotation->status === 'accepted',
+                    'bg-red-100 text-red-800' => $quotation->status === 'rejected'
+                ])>
+                    {{ $quotation->status }}
+                </span>
+            </div>
+
+            <!-- Informations client -->
+            <div class="mb-3">
+                <div class="font-medium text-gray-900">{{ $quotation->client_name }}</div>
+                @if($quotation->client_phone)
+                    <div class="text-sm text-gray-500">{{ $quotation->client_phone }}</div>
+                @endif
+            </div>
+
+            <!-- Total -->
+            <div class="mb-3">
+                <div class="text-sm text-gray-500">Total:</div>
+                <div class="font-medium text-gray-900">{{ number_format($quotation->total, 0, ',', ' ') }} FCFA</div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 pt-3 border-t">
+                <button onclick="validateQuotation({{ $quotation->id }})" 
+                        class="text-green-600 hover:text-green-900 p-2">
+                    <i class="fas fa-check"></i>
+                </button>
+                <a href="{{ route('quotations.pdf', $quotation) }}" 
+                   class="text-blue-600 hover:text-blue-900 p-2">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                <button onclick="editQuotation({{ $quotation->id }})" 
+                        class="text-yellow-600 hover:text-yellow-900 p-2">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteQuotation({{ $quotation->id }})" 
+                        class="text-red-600 hover:text-red-900 p-2">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        @empty
+        <div class="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            Aucun devis trouvé
+        </div>
+        @endforelse
+    </div>
+</div>
+
+    <!-- Vue desktop (tableau) -->
+    <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N° Devis</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse ($quotations as $quotation)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $quotation->quotation_number }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ $quotation->date->format('d/m/Y') }}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ $quotation->client_name }}</div>
+                            @if($quotation->client_phone)
+                                <div class="text-sm text-gray-500">{{ $quotation->client_phone }}</div>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                            {{ number_format($quotation->total, 0, ',', ' ') }} FCFA
+                        </td>
+                        <td class="px-6 py-4">
+                            <span @class([
+                                'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                                'bg-yellow-100 text-yellow-800' => $quotation->status === 'pending',
+                                'bg-green-100 text-green-800' => $quotation->status === 'accepted',
+                                'bg-red-100 text-red-800' => $quotation->status === 'rejected'
+                            ])>
+                                {{ $quotation->status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end space-x-3">
+                                <button onclick="validateQuotation({{ $quotation->id }})" class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <a href="{{ route('quotations.pdf', $quotation) }}" class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                                <button onclick="editQuotation({{ $quotation->id }})" class="text-yellow-600 hover:text-yellow-900">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteQuotation({{ $quotation->id }})" class="text-red-600 hover:text-red-900">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">Aucun devis trouvé</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
+    <!-- Pagination -->
     @if($quotations->hasPages())
-    <div class="mt-4">
+    <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 mt-4 rounded-lg shadow">
         {{ $quotations->links() }}
     </div>
     @endif
-</div>
 
 <!-- Modal Devis -->
+<!-- Modal Devis -->
 <div id="quotationModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-   <div class="flex min-h-screen items-center justify-center">
-       <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
-
-       <div class="relative bg-white rounded-lg w-full max-w-4xl">
-           <div class="px-6 py-4 border-b flex justify-between items-center">
-               <h3 class="text-xl font-semibold text-gray-800">Nouveau Devis</h3>
-               <button onclick="closeQuotationModal()" class="text-gray-400 hover:text-gray-500">
-                   <i class="fas fa-times"></i>
-               </button>
-           </div>
-
-           <form id="quotationForm" onsubmit="submitQuotation(event)">
-               <div class="p-6 space-y-6">
-                   <!-- Informations client -->
-                   <div class="grid grid-cols-3 gap-4">
-                       <div>
-                           <label class="block text-sm font-medium text-gray-700 mb-2">
-                               Nom du client <span class="text-red-500">*</span>
-                           </label>
-                           <input type="text" name="client_name" required
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                       </div>
-                       <div>
-                           <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                           <input type="text" name="client_phone"
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                       </div>
-                       <div>
-                           <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                           <input type="email" name="client_email"
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                       </div>
-                   </div>
-
-                   <!-- Produits -->
-                   <div class="border rounded-lg p-4">
-                       <div class="flex justify-between items-center mb-4">
-                           <h4 class="font-medium">Produits</h4>
-                           <button type="button" onclick="addQuotationProduct()"
-                               class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">
-                               <i class="fas fa-plus mr-2"></i>Ajouter
-                           </button>
-                       </div>
-                       <div id="quotationProducts"></div>
-                   </div>
-
-                   <!-- Totaux -->
-                   <div class="grid grid-cols-2 gap-4">
-                       <div>
-                           <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                           <textarea name="notes" rows="4"
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500"></textarea>
-                       </div>
-                       <div class="bg-gray-50 p-4 rounded-lg">
-                           <div class="space-y-2">
-                               <div class="flex justify-between">
-                                   <span>Sous-total:</span>
-                                   <span id="quotationSubtotal">0 FCFA</span>
-                               </div>
-                               <div class="flex justify-between items-center">
-                                   <span>TVA (%):</span>
-                                   <input type="number" name="tax" value="0" min="0" max="100"
-                                       class="w-20 px-2 py-1 border rounded text-right"
-                                       oninput="calculateQuotationTotal()">
-                               </div>
-                               <div class="flex justify-between font-bold border-t pt-2">
-                                   <span>Total:</span>
-                                   <span id="quotationTotal">0 FCFA</span>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-
-               <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-4 rounded-b-lg">
-                   <button type="button" onclick="closeQuotationModal()"
-                       class="px-4 py-2 border rounded-lg hover:bg-gray-100">
-                       Annuler
-                   </button>
-                   <button type="submit" id="submitQuotationBtn"
-                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                       Enregistrer le devis
-                   </button>
-               </div>
-           </form>
-       </div>
-   </div>
-</div>
-
-<!-- Template produit -->
-<template id="quotationProductTemplate">
-   <div class="product-row grid grid-cols-12 gap-4 items-center mb-4">
-       <div class="col-span-5">
-           <input type="text" placeholder="Rechercher un produit..."
-               class="w-full px-3 py-2 border rounded focus:ring-blue-500"
-               oninput="searchQuotationProducts(this)">
-           <div class="suggestions hidden absolute z-10 w-full bg-white border rounded-lg shadow-lg"></div>
-       </div>
-       <div class="col-span-2">
-           <input type="number" min="1" value="1"
-               class="w-full px-3 py-2 border rounded text-right"
-               oninput="updateQuotationRow(this)">
-       </div>
-       <div class="col-span-3 text-right">
-           <div class="font-medium">0 FCFA</div>
-           <div class="text-sm text-gray-500"></div>
-       </div>
-       <div class="col-span-2 text-right">
-           <button type="button" onclick="removeQuotationRow(this)" class="text-red-600 hover:text-red-800">
-               <i class="fas fa-trash"></i>
-           </button>
-       </div>
-   </div>
-</template>
-
-<!-- Correction du modal d'édition -->
-<div id="editQuotationModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex min-h-screen items-center justify-center">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Overlay -->
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+
+        <!-- Contenu Modal -->
         <div class="relative bg-white rounded-lg w-full max-w-4xl">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="text-xl font-semibold text-gray-800">Modifier le Devis</h3>
-                <button onclick="closeEditQuotationModal()" class="text-gray-400 hover:text-gray-500">
+            <!-- En-tête Modal -->
+            <div class="px-4 sm:px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-800">Nouveau Devis</h3>
+                <button onclick="closeQuotationModal()" class="text-gray-400 hover:text-gray-500 p-2">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <!-- Modifier l'ID du formulaire -->
-            <form id="editQuotationForm" onsubmit="submitEditQuotation(event)">
-                <div class="p-6 space-y-6">
+            <form id="quotationForm" onsubmit="submitQuotation(event)">
+                <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <!-- Informations client -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Nom du client <span class="text-red-500">*</span>
@@ -259,53 +224,191 @@
 
                     <!-- Produits -->
                     <div class="border rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-medium">Produits</h4>
-                            <button type="button" onclick="addEditQuotationProduct()"
-                                class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                            <h4 class="font-medium text-gray-700">Produits <span class="text-red-500">*</span></h4>
+                            <button type="button" onclick="addQuotationProduct()"
+                                class="w-full sm:w-auto bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 flex items-center justify-center">
                                 <i class="fas fa-plus mr-2"></i>Ajouter
                             </button>
                         </div>
-                        <!-- Corriger l'ID du conteneur -->
-                        <div id="editQuotationProducts"></div>
+                        <div id="quotationProducts" class="space-y-4"></div>
                     </div>
 
-                    <!-- Totaux -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <!-- Totaux et Notes -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
                             <textarea name="notes" rows="4"
-                                class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500"></textarea>
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 resize-none"></textarea>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <div class="space-y-2">
-                                <div class="flex justify-between">
-                                    <span>Sous-total:</span>
-                                    <!-- Corriger l'ID pour l'édition -->
-                                    <span id="editQuotationSubtotal">0 FCFA</span>
-                                </div>
+                            <div class="space-y-3">
                                 <div class="flex justify-between items-center">
-                                    <span>TVA (%):</span>
+                                    <span class="text-gray-600">Sous-total:</span>
+                                    <span id="quotationSubtotal">0 FCFA</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                    <span class="text-gray-600">TVA (%):</span>
                                     <input type="number" name="tax" value="0" min="0" max="100"
-                                        class="w-20 px-2 py-1 border rounded text-right"
+                                        class="w-full sm:w-24 px-3 py-2 border rounded text-right"
                                         oninput="calculateQuotationTotal()">
                                 </div>
-                                <div class="flex justify-between font-bold border-t pt-2">
-                                    <span>Total:</span>
-                                    <!-- Corriger l'ID pour l'édition -->
-                                    <span id="editQuotationTotal">0 FCFA</span>
+                                <div class="flex justify-between items-center pt-3 border-t">
+                                    <span class="font-bold">Total:</span>
+                                    <span id="quotationTotal" class="font-bold text-lg">0 FCFA</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-4 rounded-b-lg">
-                    <button type="button" onclick="closeEditQuotationModal()"
-                        class="px-4 py-2 border rounded-lg hover:bg-gray-100">
+                <!-- Pied de Modal -->
+                <div class="px-4 sm:px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-lg">
+                    <button type="button" onclick="closeQuotationModal()"
+                        class="w-full sm:w-auto px-4 py-2 border rounded-lg hover:bg-gray-100">
                         Annuler
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <button type="submit"
+                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Enregistrer le devis
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Template pour la ligne de produit -->
+<template id="quotationProductTemplate">
+    <div class="product-row bg-gray-50 p-3 rounded-lg">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <!-- Recherche Produit -->
+            <div class="sm:col-span-5">
+                <label class="block text-sm text-gray-600 mb-1 sm:hidden">Produit</label>
+                <div class="relative">
+                    <input type="text" 
+                        placeholder="Rechercher un produit..."
+                        class="w-full px-3 py-2 border rounded focus:ring-blue-500"
+                        oninput="searchQuotationProducts(this)">
+                    <div class="suggestions hidden mt-1 absolute z-10 w-full bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantité -->
+            <div class="sm:col-span-2">
+                <label class="block text-sm text-gray-600 mb-1 sm:hidden">Quantité</label>
+                <input type="number" min="1" value="1"
+                    class="w-full px-3 py-2 border rounded text-right"
+                    oninput="updateQuotationRow(this)">
+            </div>
+
+            <!-- Prix Total -->
+            <div class="sm:col-span-3">
+                <label class="block text-sm text-gray-600 mb-1 sm:hidden">Prix</label>
+                <div class="text-right">
+                    <div class="font-medium">0 FCFA</div>
+                    <div class="text-sm text-gray-500"></div>
+                </div>
+            </div>
+
+            <!-- Bouton Supprimer -->
+            <div class="sm:col-span-2 flex justify-end">
+                <button type="button" onclick="removeQuotationRow(this)" 
+                    class="text-red-600 hover:text-red-800 p-2">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Modal d'édition -->
+<div id="editQuotationModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        
+        <!-- Contenu Modal -->
+        <div class="relative bg-white rounded-lg w-full max-w-4xl">
+            <div class="px-4 sm:px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-800">Modifier le Devis</h3>
+                <button onclick="closeEditQuotationModal()" class="text-gray-400 hover:text-gray-500 p-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="editQuotationForm" onsubmit="submitEditQuotation(event)">
+                <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <!-- Informations client -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Nom du client <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="client_name" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                            <input type="text" name="client_phone"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" name="client_email"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Produits -->
+                    <div class="border rounded-lg p-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                            <h4 class="font-medium text-gray-700">Produits <span class="text-red-500">*</span></h4>
+                            <button type="button" onclick="addEditQuotationProduct()"
+                                class="w-full sm:w-auto bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i>Ajouter
+                            </button>
+                        </div>
+                        <div id="editQuotationProducts" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Totaux et Notes -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <textarea name="notes" rows="4"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 resize-none"></textarea>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Sous-total:</span>
+                                    <span id="editQuotationSubtotal">0 FCFA</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                    <span class="text-gray-600">TVA (%):</span>
+                                    <input type="number" name="tax" value="0" min="0" max="100"
+                                        class="w-full sm:w-24 px-3 py-2 border rounded text-right"
+                                        oninput="calculateQuotationTotal()">
+                                </div>
+                                <div class="flex justify-between items-center pt-3 border-t">
+                                    <span class="font-bold">Total:</span>
+                                    <span id="editQuotationTotal" class="font-bold text-lg">0 FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pied de Modal -->
+                <div class="px-4 sm:px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3 rounded-b-lg">
+                    <button type="button" onclick="closeEditQuotationModal()"
+                        class="w-full sm:w-auto px-4 py-2 border rounded-lg hover:bg-gray-100">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                         Mettre à jour le devis
                     </button>
                 </div>
@@ -313,6 +416,7 @@
         </div>
     </div>
 </div>
+
 @push('scripts')
     <script>
 // Variables globales et initialisation
@@ -487,25 +591,52 @@ function deleteQuotation(id) {
         }
     }
 
-function validateQuotation(id) {
-   if(confirm('Voulez-vous valider ce devis et créer une vente ?')) {
-       fetch(`/quotations/${id}/validate`, {
-           method: 'POST',
-           headers: {
-               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-           }
-       })
-       .then(response => {
-           if(response.ok) {
-               alert('Devis validé et converti en vente');
-               location.reload();
-           } else {
-               alert('Erreur lors de la validation');
-           }
-       });
-   }
-}
+    async function validateQuotation(id) {
+    try {
+        const result = await Swal.fire({
+            title: 'Confirmer la validation',
+            text: 'Voulez-vous valider ce devis et créer une vente ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, valider',
+            cancelButtonText: 'Annuler',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545'
+        });
 
+        if (result.isConfirmed) {
+            const response = await fetch(`/quotations/${id}/validate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({
+                    title: 'Succès',
+                    text: 'Devis validé et converti en vente avec succès',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                location.reload();
+            } else {
+                throw new Error(data.error || 'Une erreur est survenue lors de la validation');
+            }
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Erreur',
+            text: error.message,
+            icon: 'error'
+        });
+    }
+}
 // Gestionnaires d'événements
 document.addEventListener('click', function(e) {
    if(!e.target.closest('.product-row')) {
