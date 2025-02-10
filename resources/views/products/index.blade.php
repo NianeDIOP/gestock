@@ -26,32 +26,28 @@
                     </nav>
                 </div>
                 <!-- Boutons d'actions responsive -->
-                <div class="flex flex-wrap gap-3">
+                <div class="flex items-center space-x-2">
                     <a href="{{ route('products.out_of_stock') }}" 
-                        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center w-full sm:w-auto justify-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <span>Ruptures</span>
-                        <span class="ml-2 bg-orange-700 px-2 py-1 rounded-full text-xs">
+                        class="inline-flex items-center text-sm bg-orange-600 text-white px-2.5 py-1.5 rounded hover:bg-orange-700 transition-colors">
+                        <i class="fas fa-exclamation-triangle text-sm mr-1.5"></i>Ruptures
+                        <span class="ml-1.5 bg-orange-700 px-1.5 rounded text-xs">
                             {{ \App\Models\Product::where('quantity', 0)->count() }}
                         </span>
                     </a>
                     
                     <button onclick="openAddModal()" 
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center w-full sm:w-auto justify-center">
-                        <i class="fas fa-plus mr-2"></i>
-                        <span>Nouveau</span>
+                        class="inline-flex items-center text-sm bg-indigo-600 text-white px-2.5 py-1.5 rounded hover:bg-indigo-700 transition-colors">
+                        <i class="fas fa-plus text-sm mr-1.5"></i>Nouveau
                     </button>
                     
                     <a href="{{ route('products.export.pdf') }}" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center w-full sm:w-auto justify-center">
-                        <i class="fas fa-file-pdf mr-2"></i>
-                        <span>PDF</span>
+                        class="inline-flex items-center text-sm bg-red-600 text-white px-2.5 py-1.5 rounded hover:bg-red-700 transition-colors">
+                        <i class="fas fa-file-pdf text-sm mr-1.5"></i>Liste PDF
                     </a>
                     
                     <button onclick="openReportModal()" 
-                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center w-full sm:w-auto justify-center">
-                        <i class="fas fa-chart-bar mr-2"></i>
-                        <span>Rapport</span>
+                        class="inline-flex items-center text-sm bg-purple-600 text-white px-2.5 py-1.5 rounded hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-chart-bar text-sm mr-1.5"></i>Rapport produit
                     </button>
                 </div>
         </div>
