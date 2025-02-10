@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Fond -->
+  <rect width="32" height="32" rx="6" fill="#4F46E5"/>
+  
+  <!-- Icône d'entrepôt/boîte stylisée -->
+  <path d="M8 12L16 8L24 12V22L16 26L8 22V12Z" 
+        fill="white" 
+        stroke="white" 
+        stroke-width="1.5"/>
+  
+  <!-- Lettre G -->
+  <text x="16" y="19" 
+        font-family="Arial Black, Arial-BoldMT, Arial, sans-serif" 
+        font-size="10"
+        font-weight="bold"
+        fill="#4F46E5"
+        text-anchor="middle"
+        dominant-baseline="middle">G</text>
+</svg>
