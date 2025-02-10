@@ -245,7 +245,7 @@
                 <!-- Logo et nom - Extrême gauche -->
                 <div class="flex items-center">
                     <i class="fas fa-warehouse text-blue-800 text-xl mr-2"></i>
-                    <span class="font-bold text-gray-1000">{{ $settings['name'] }}</span>
+                    <span class="font-bold text-gray-1000">{{ $settings['name'] }} </span>
                 </div>
     
                 <!-- Infos droite (toutes visibles en desktop, masquées en mobile) -->
@@ -253,11 +253,11 @@
                     <!-- Téléphone et email -->
                     <span class="flex items-center text-gray-600">
                         <i class="fas fa-phone mr-2"></i>
-                        {{ $settings['phone'] }}
+                        {{ $settings['phone'] }} 
                     </span>
                     <span class="flex items-center text-gray-600">
                         <i class="fas fa-envelope mr-2"></i>
-                        {{ $settings['email'] }}
+                        {{ $settings['email'] }} 
                     </span>
     
                     <!-- Adresse et date -->

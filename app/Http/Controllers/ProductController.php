@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\Supplier;
+use App\Models\SupplierProduct;
 
 class ProductController extends Controller
 {

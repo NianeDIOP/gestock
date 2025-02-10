@@ -6,21 +6,77 @@
 @section('content')
 <div class="container px-4 mx-auto">
     <!-- En-tête -->
-    <div class="sm:flex sm:items-center sm:justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Liste des fournisseurs</h2>
-        <div class="flex gap-4 mt-4 sm:mt-0">
+    <!-- En-tête -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Liste des fournisseurs</h2>
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <a href="#" 
-               onclick="exportList(); return false;" 
-               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm">
+            onclick="exportList(); return false;" 
+            class="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm">
                 <i class="fas fa-file-download mr-2"></i>
                 Exporter la liste
             </a>
             <button onclick="openAddModal()" 
-                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm">
+                    class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm">
                 <i class="fas fa-plus mr-2"></i>
                 Ajouter un fournisseur
             </button>
         </div>
+    </div>
+
+    <!-- Vue mobile (cartes) -->
+    <div class="block lg:hidden space-y-4">
+        @forelse ($suppliers as $supplier)
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-medium text-gray-900">{{ $supplier->name }}</h3>
+                        @if($supplier->contact_person)
+                            <p class="text-sm text-gray-600 mt-1">Contact: {{ $supplier->contact_person }}</p>
+                        @endif
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openEditModal({{ $supplier->id }})" 
+                                class="text-indigo-600 hover:text-indigo-900 p-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <form action="{{ route('suppliers.destroy', $supplier->id) }}" 
+                            method="POST" 
+                            class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="text-red-600 hover:text-red-900 p-2" 
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur ?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="mt-3 space-y-2">
+                    @if($supplier->email)
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-envelope mr-2"></i>{{ $supplier->email }}
+                        </p>
+                    @endif
+                    @if($supplier->phone)
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-phone mr-2"></i>{{ $supplier->phone }}
+                        </p>
+                    @endif
+                    @if($supplier->address)
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-map-marker-alt mr-2"></i>{{ $supplier->address }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-lg shadow-md p-4 text-center text-gray-500">
+                Aucun fournisseur trouvé
+            </div>
+        @endforelse
     </div>
 
     <!-- Tableau des fournisseurs -->

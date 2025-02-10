@@ -33,6 +33,8 @@ Route::middleware(['auth'])->group(function () {
 
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
    Route::get('/dashboard/filter', [DashboardController::class, 'filter'])->name('dashboard.filter');
+   Route::get('/check-stock', [DashboardController::class, 'checkStock'])->name('check.stock');
+   Route::post('/dismiss-stock-alert', [DashboardController::class, 'dismissStockAlert'])->name('dismiss.stock.alert');
    
 
    // Catégories

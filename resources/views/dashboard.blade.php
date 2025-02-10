@@ -150,6 +150,68 @@
         </div>
         </div>
 
+        <!-- Modal Alerte Stock -->
+<div id="stockAlertModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        
+        <!-- Contenu Modal -->
+        <div class="relative bg-white rounded-lg w-full max-w-2xl">
+            <!-- En-tête -->
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                    Alerte Stock
+                </h3>
+                <button onclick="closeStockAlert()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Corps -->
+            <div class="px-6 py-4 max-h-[60vh] overflow-y-auto">
+                <div id="stockAlertContent" class="space-y-4">
+                    @foreach($lowStockProducts as $product)
+                        <div class="flex items-center justify-between p-4 {{ $product->quantity === 0 ? 'bg-red-50' : 'bg-orange-50' }} rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-gray-900">{{ $product->name }}</h4>
+                                <p class="text-sm text-gray-500">
+                                    Réf: {{ $product->reference }} | 
+                                    Catégorie: {{ $product->category->name }}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold {{ $product->quantity === 0 ? 'text-red-600' : 'text-orange-600' }}">
+                                    {{ $product->quantity }}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    Seuil: {{ $product->stock_threshold }}
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Pied -->
+            <div class="px-6 py-4 bg-gray-50 flex justify-between items-center rounded-b-lg">
+                <span class="text-sm text-gray-500">
+                    {{ $lowStockProducts->count() }} produit(s) en alerte
+                </span>
+                <div class="flex gap-3">
+                    <a href="{{ route('products.index') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Gérer le stock
+                    </a>
+                    <button onclick="closeStockAlert(true)" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                        Ne plus afficher
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -520,6 +582,50 @@ function debounce(func, wait) {
    };
 
 }
+
+// Gestion des alertes stock
+let stockAlertShown = false;
+
+function checkStockAlerts() {
+    if (stockAlertShown) return;
+    
+    fetch('/check-stock')
+        .then(response => response.json())
+        .then(data => {
+            if (data.hasLowStock) {
+                showStockAlert();
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}
+
+function showStockAlert() {
+    const modal = document.getElementById('stockAlertModal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    stockAlertShown = true;
+}
+
+function closeStockAlert(dismiss = false) {
+    const modal = document.getElementById('stockAlertModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    if (dismiss) {
+        fetch('/dismiss-stock-alert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+    }
+}
+
+// Vérifier les alertes au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    checkStockAlerts();
+});
 </script>
 @endpush
 @endsection

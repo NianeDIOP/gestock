@@ -11,8 +11,37 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+
+
+    /**
+     * Récupère tous les produits en rupture ou stock faible
+     */
+    private function getLowStockProducts()
+    {
+        return Product::select(
+            'id', 
+            'name', 
+            'reference', 
+            'quantity', 
+            'stock_threshold',
+            'category_id'
+        )
+        ->with('category:id,name') // Charger la relation catégorie
+        ->where(function($query) {
+            $query->where('quantity', 0) // Produits en rupture
+                  ->orWhereRaw('quantity <= stock_threshold'); // Produits sous le seuil d'alerte
+        })
+        ->orderBy('quantity', 'asc') // Trier par quantité croissante
+        ->get();
+    }
+    
+
+     /**
+     * Affichage du tableau de bord avec vérification du stock
+     */
     public function index(Request $request)
     {
+        // Code existant...
         $year = (int)$request->get('year', date('Y'));
         $period = $request->get('period', 'month');
         
@@ -20,7 +49,10 @@ class DashboardController extends Controller
         $startDate = $dateRange['start'];
         $endDate = $dateRange['end'];
 
-        // Statistiques principales
+        // Récupérer les produits en alerte stock
+        $lowStockProducts = $this->getLowStockProducts();
+        
+        // Statistiques existantes
         $dailyStats = [
             'sales' => Sale::whereBetween('created_at', [$startDate, $endDate])->sum('total'),
             'products_sold' => SaleItem::whereHas('sale', fn($q) => $q->whereBetween('created_at', [$startDate, $endDate]))->sum('quantity'),
@@ -28,8 +60,9 @@ class DashboardController extends Controller
             'invoices' => Sale::whereBetween('created_at', [$startDate, $endDate])->count()
         ];
 
-        // Données graphiques
         return view('dashboard', [
+            'lowStockProducts' => $lowStockProducts,
+            'hasLowStock' => $lowStockProducts->isNotEmpty(),
             'dailyStats' => $dailyStats,
             'salesChartData' => $this->getSalesChartData($startDate, $endDate, $period),
             'categoryChartData' => $this->getCategoryChartData($startDate, $endDate),
@@ -38,6 +71,46 @@ class DashboardController extends Controller
             'year' => $year,
             'period' => $period
         ]);
+    }
+
+    /**
+     * Vérifie l'état du stock via API
+     */
+    public function checkStock()
+        {
+            $shouldShow = $this->shouldShowStockAlert();
+            $lowStockProducts = $shouldShow ? $this->getLowStockProducts() : collect();
+
+            return response()->json([
+                'hasLowStock' => $lowStockProducts->isNotEmpty() && $shouldShow,
+                'products' => $lowStockProducts
+            ]);
+        }
+
+    /**
+     * Marque l'alerte comme vue pour la session courante
+     */
+    public function dismissStockAlert()
+    {
+        // Stockage pour 24h
+        $dismissedUntil = Carbon::now()->addHours(24);
+        
+        DB::table('stock_alert_dismissals')->updateOrInsert(
+            ['user_id' => auth()->id()],
+            ['dismissed_until' => $dismissedUntil]
+        );
+    
+        return response()->json(['success' => true]);
+    }
+    
+    private function shouldShowStockAlert()
+    {
+        $dismissal = DB::table('stock_alert_dismissals')
+            ->where('user_id', auth()->id())
+            ->where('dismissed_until', '>', Carbon::now())
+            ->first();
+    
+        return !$dismissal;
     }
 
     private function getDateRange($period, $year)
