@@ -10,9 +10,14 @@
             <h2 class="text-xl md:text-2xl font-bold text-gray-800">Gestion des Ventes</h2>
             <p class="text-sm md:text-base text-gray-600">{{ $sales->total() }} ventes enregistrées</p>
         </div>
-        <button onclick="openSaleModal()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
-            <i class="fas fa-plus"></i>Nouvelle Vente
-        </button>
+        <div class="flex flex-wrap gap-2">
+            <button onclick="openSaleModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded flex items-center text-sm">
+                <i class="fas fa-plus mr-1.5"></i>Nouvelle Vente
+            </button>
+            <button onclick="openExportModal()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded flex items-center text-sm">
+                <i class="fas fa-file-excel mr-1.5"></i>Exporter Excel
+            </button>
+        </div>
     </div>
 
     <!-- Cartes statistiques -->
@@ -585,6 +590,96 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal Exportation Excel -->
+<div id="exportModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        
+        <!-- Contenu Modal -->
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="px-4 sm:px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-file-excel mr-2 text-green-600"></i>Exporter les ventes
+                </h3>
+                <button onclick="closeExportModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('sales.export.excel') }}" method="GET" class="p-4 sm:p-6 space-y-4">
+                <!-- Période -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Période <span class="text-red-500">*</span>
+                    </label>
+                    <select name="period" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="today">Aujourd'hui</option>
+                        <option value="yesterday">Hier</option>
+                        <option value="this_week">Cette semaine</option>
+                        <option value="last_week">Semaine dernière</option>
+                        <option value="this_month">Ce mois</option>
+                        <option value="last_month">Mois dernier</option>
+                        <option value="custom">Période personnalisée</option>
+                    </select>
+                </div>
+
+                <!-- Dates personnalisées -->
+                <div id="customDateRange" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Date de début
+                        </label>
+                        <input type="date" name="start_date" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Date de fin
+                        </label>
+                        <input type="date" name="end_date" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeExportModal()" 
+                        class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button type="submit" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <i class="fas fa-download mr-2"></i>Exporter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openExportModal() {
+        document.getElementById('exportModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeExportModal() {
+        document.getElementById('exportModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Gérer l'affichage des dates personnalisées
+    document.querySelector('select[name="period"]').addEventListener('change', function() {
+        const customDateRange = document.getElementById('customDateRange');
+        if (this.value === 'custom') {
+            customDateRange.classList.remove('hidden');
+        } else {
+            customDateRange.classList.add('hidden');
+        }
+    });
+</script>
+@endpush
 
 <script>
     const globalState = {

@@ -105,6 +105,7 @@ Route::middleware(['auth'])->group(function () {
       
       // Route pour le PDF
       Route::get('/{sale}/pdf', [SaleController::class, 'generatePdf'])->name('sales.pdf');
+      Route::get('/export/excel', [SaleController::class, 'exportExcel'])->name('sales.export.excel');
   });
 
    Route::prefix('suppliers')->group(function () {

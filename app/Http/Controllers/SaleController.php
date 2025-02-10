@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Sale;
 use App\Models\Product;
 use App\Models\SaleItem;
@@ -9,6 +10,12 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;  // Ajout de cette ligne
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
@@ -302,6 +309,145 @@ class SaleController extends Controller
                 'success' => false,
                 'message' => "Impossible de supprimer cette vente : " . $e->getMessage()
             ], 422);
+        }
+    }
+
+    
+    public function exportExcel(Request $request)
+    {
+        try {
+            // Construire la requête en fonction de la période
+            $period = $request->input('period');
+            $query = Sale::with(['items.product']);
+    
+            // Déterminer la période
+            switch ($period) {
+                case 'today':
+                    $query->whereDate('sale_date', today());
+                    $title = "Ventes du " . today()->format('d/m/Y');
+                    break;
+                case 'yesterday':
+                    $query->whereDate('sale_date', today()->subDay());
+                    $title = "Ventes du " . today()->subDay()->format('d/m/Y');
+                    break;
+                case 'this_week':
+                    $query->whereBetween('sale_date', [now()->startOfWeek(), now()->endOfWeek()]);
+                    $title = "Ventes de la semaine en cours";
+                    break;
+                case 'last_week':
+                    $query->whereBetween('sale_date', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()]);
+                    $title = "Ventes de la semaine dernière";
+                    break;
+                case 'this_month':
+                    $query->whereMonth('sale_date', now()->month);
+                    $title = "Ventes du mois de " . now()->format('F Y');
+                    break;
+                case 'last_month':
+                    $query->whereMonth('sale_date', now()->subMonth()->month);
+                    $title = "Ventes du mois de " . now()->subMonth()->format('F Y');
+                    break;
+                case 'custom':
+                    if ($request->filled(['start_date', 'end_date'])) {
+                        $query->whereBetween('sale_date', [$request->start_date, $request->end_date]);
+                        $title = "Ventes du " . \Carbon\Carbon::parse($request->start_date)->format('d/m/Y') . 
+                                " au " . \Carbon\Carbon::parse($request->end_date)->format('d/m/Y');
+                    }
+                    break;
+            }
+    
+            $sales = $query->get();
+    
+            // Créer un nouveau fichier Excel
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+    
+            // En-tête du document
+            $sheet->mergeCells('A1:G1');
+            $sheet->setCellValue('A1', $title);
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    
+            // En-têtes des colonnes
+            $headers = [
+                'A2' => 'N° Vente',
+                'B2' => 'Date',
+                'C2' => 'Client',
+                'D2' => 'Téléphone',
+                'E2' => 'Mode de paiement',
+                'F2' => 'Total HT',
+                'G2' => 'Total TTC'
+            ];
+    
+            foreach ($headers as $cell => $value) {
+                $sheet->setCellValue($cell, $value);
+            }
+    
+            // Style des en-têtes
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['rgb' => 'E2E8F0']
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN
+                    ]
+                ]
+            ];
+            $sheet->getStyle('A2:G2')->applyFromArray($headerStyle);
+    
+            // Remplir les données
+            $row = 3;
+            foreach ($sales as $sale) {
+                $sheet->setCellValue('A' . $row, $sale->sale_number);
+                $sheet->setCellValue('B' . $row, $sale->sale_date->format('d/m/Y H:i'));
+                $sheet->setCellValue('C' . $row, $sale->client_name);
+                $sheet->setCellValue('D' . $row, $sale->client_phone);
+                $sheet->setCellValue('E' . $row, ucfirst($sale->payment_method));
+                $sheet->setCellValue('F' . $row, $sale->subtotal);
+                $sheet->setCellValue('G' . $row, $sale->total);
+                $row++;
+            }
+    
+            // Formatage des colonnes
+            $sheet->getColumnDimension('A')->setWidth(15);
+            $sheet->getColumnDimension('B')->setWidth(20);
+            $sheet->getColumnDimension('C')->setWidth(25);
+            $sheet->getColumnDimension('D')->setWidth(15);
+            $sheet->getColumnDimension('E')->setWidth(15);
+            $sheet->getColumnDimension('F')->setWidth(15);
+            $sheet->getColumnDimension('G')->setWidth(15);
+    
+            // Format monétaire pour les colonnes de montants
+            $lastRow = $row - 1;
+            $sheet->getStyle("F3:G$lastRow")->getNumberFormat()->setFormatCode('#,##0.00 "FCFA"');
+    
+            // Totaux
+            $row++;
+            $sheet->mergeCells("A$row:E$row");
+            $sheet->setCellValue("A$row", 'TOTAL');
+            $sheet->setCellValue("F$row", "=SUM(F3:F$lastRow)");
+            $sheet->setCellValue("G$row", "=SUM(G3:G$lastRow)");
+            $sheet->getStyle("A$row:G$row")->getFont()->setBold(true);
+            $sheet->getStyle("F$row:G$row")->getNumberFormat()->setFormatCode('#,##0.00 "FCFA"');
+    
+            // Style global
+            $sheet->getStyle("A3:G$row")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    
+            // Créer la réponse
+            $fileName = Str::slug($title) . '.xlsx';
+            $writer = new Xlsx($spreadsheet);
+    
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $fileName . '"');
+            header('Cache-Control: max-age=0');
+    
+            $writer->save('php://output');
+            exit;
+    
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'exportation : ' . $e->getMessage());
         }
     }
 }
