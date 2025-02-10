@@ -48,31 +48,41 @@ Route::middleware(['auth'])->group(function () {
   
    // Produits
   // Fichier routes/web.php
-Route::prefix('products')->group(function () {
-   // Routes sans paramètre
-   Route::get('/', [ProductController::class, 'index'])->name('products.index');
-   Route::get('/out-of-stock', [ProductController::class, 'outOfStock'])->name('products.out_of_stock');
-   Route::get('/export/pdf', [ProductController::class, 'exportPdf'])->name('products.export.pdf');
-   Route::get('/search', [ProductController::class, 'searchProducts'])->name('products.search');
-    // Ajoutez la route generate-report ici
-    Route::get('/generate-report', [ProductController::class, 'generateReport'])
-    ->name('products.generate.report');
-  
-    // Routes avec paramètre {product} EN DERNIER
-   Route::post('/', [ProductController::class, 'store'])->name('products.store');
-   Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-   Route::patch('/{product}/threshold', [ProductController::class, 'updateStockThreshold'])->name('products.update-threshold');
-   Route::patch('/{product}/stock', [ProductController::class, 'updateStock'])->name('products.update-stock');
-   Route::get('/{product}/restock', [ProductController::class, 'showRestockModal'])->name('products.restock.modal');
-   Route::post('/{product}/restock', [ProductController::class, 'restock'])->name('products.restock');
-   
-   // LA ROUTE SHOW DOIT ÊTRE DERNIÈRE
-   Route::get('/{product}', [ProductController::class, 'show'])->name('products.show');
-   Route::put('/{product}', [ProductController::class, 'update'])->name('products.update');
-   
-   Route::delete('/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-});
+  Route::prefix('products')->group(function () {
+   // 1. Routes sans paramètre
+   Route::get('/', [ProductController::class, 'index'])
+       ->name('products.index');
+   Route::post('/', [ProductController::class, 'store'])
+       ->name('products.store');
+   Route::get('/out-of-stock', [ProductController::class, 'outOfStock'])
+       ->name('products.out_of_stock');
+   Route::get('/export/pdf', [ProductController::class, 'exportPdf'])
+       ->name('products.export.pdf');
+   Route::get('/search', [ProductController::class, 'searchProducts'])
+       ->name('products.search');
+   Route::get('/generate-report', [ProductController::class, 'generateReport'])
+       ->name('products.generate.report');
 
+   // 2. Routes spécifiques avec paramètre product
+   Route::get('/{product}/edit', [ProductController::class, 'edit'])
+       ->name('products.edit');
+   Route::patch('/{product}/threshold', [ProductController::class, 'updateStockThreshold'])
+       ->name('products.update-threshold');
+   Route::patch('/{product}/stock', [ProductController::class, 'updateStock'])
+       ->name('products.update-stock');
+   Route::get('/{product}/restock', [ProductController::class, 'showRestockModal'])
+       ->name('products.restock.modal');
+   Route::post('/{product}/restock', [ProductController::class, 'restock'])
+       ->name('products.restock');
+
+   // 3. Routes CRUD de base avec paramètre product
+   Route::get('/{product}', [ProductController::class, 'show'])
+       ->name('products.show');
+   Route::put('/{product}', [ProductController::class, 'update'])
+       ->name('products.update');
+   Route::delete('/{product}', [ProductController::class, 'destroy'])
+       ->name('products.destroy');
+});
 
    // Factures
    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');

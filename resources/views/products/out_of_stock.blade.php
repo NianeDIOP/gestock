@@ -96,6 +96,7 @@
 
             <form id="restockForm" method="POST">
                 @csrf
+                @method('PATCH')
                 <div class="p-6 space-y-4">
                     <div>
                         <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantité à ajouter <span class="text-red-500">*</span></label>
@@ -180,17 +181,13 @@
 function openRestockModal(productId = null) {
     const modal = document.getElementById('restockModal');
     const form = document.getElementById('restockForm');
-
+    
     if (productId) {
-        form.action = `/products/${productId}/restock`;
-    } else {
-        form.action = '/products/restock';
+        form.action = `/products/${productId}/stock`;
     }
-
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
-
 function closeRestockModal() {
     document.getElementById('restockModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
@@ -201,6 +198,49 @@ document.getElementById('categoryFilter').addEventListener('change', function() 
     window.location.href = `/products/out-of-stock?category=${categoryId}`;
 });
 
+
+async function submitStock(event) {
+    event.preventDefault();
+    const productId = document.getElementById('productId').value;
+    const quantity = document.getElementById('addQuantity').value;
+
+    try {
+        const response = await fetch(`/products/${productId}/stock`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ quantity: parseInt(quantity) })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Afficher le message de succès avec SweetAlert2
+            await Swal.fire({
+                icon: 'success',
+                title: 'Succès!',
+                text: 'Stock mis à jour avec succès',
+                timer: 1500
+            });
+            
+            // Fermer le modal
+            closeStockModal();
+            
+            // Recharger la page pour mettre à jour la liste
+            location.reload();
+        } else {
+            throw new Error(result.message || 'Erreur lors de la mise à jour');
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: error.message
+        });
+    }
+}
 async function showProduct(productId) {
     try {
         const response = await fetch(`/products/${productId}`, {
@@ -210,31 +250,34 @@ async function showProduct(productId) {
             }
         });
         
-        if (!response.ok) throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        if (!response.ok) {
+            throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
         
         const product = await response.json();
 
-        // Remplissage de la modale
+        // Remplir les champs du modal avec les données du produit
         document.getElementById('modal-reference').textContent = product.reference;
         document.getElementById('modal-name').textContent = product.name;
         document.getElementById('modal-category').textContent = product.category?.name || '-';
-        document.getElementById('modal-price').textContent = `${parseFloat(product.price).toFixed(2).replace('.', ',')} FCFA`;
+        document.getElementById('modal-price').textContent = `${parseFloat(product.price).toLocaleString('fr-FR')} FCFA`;
         document.getElementById('modal-quantity').textContent = product.quantity;
         document.getElementById('modal-threshold').textContent = product.stock_threshold;
         document.getElementById('modal-description').textContent = product.description || 'Aucune description';
 
-        // Affichage de la modale
+        // Afficher le modal
         const modal = document.getElementById('productModal');
         modal.classList.remove('hidden');
-        modal.style.display = 'block';
-        document.body.classList.add('overflow-hidden');
+        document.body.style.overflow = 'hidden';
 
     } catch (error) {
-        console.error('Échec:', error);
-        alert(`Erreur : ${error.message}`);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: error.message
+        });
     }
 }
-
 function closeProductModal() {
     const modal = document.getElementById('productModal');
     modal.classList.add('hidden');

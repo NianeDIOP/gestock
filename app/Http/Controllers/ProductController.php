@@ -127,6 +127,13 @@ class ProductController extends Controller
     }
 
     /**
+     * Affiche les détails d'un produit
+     */
+    public function show(Product $product)
+    {
+        return response()->json($product->load('category'));
+    }
+    /**
      * Supprime un produit
      */
     public function destroy(Product $product)
@@ -394,18 +401,22 @@ private function getPeriodLabel($period, $year)
      * Met à jour le stock d'un produit
      */
     public function updateStock(Request $request, Product $product)
-    {
-        $request->validate([
-            'quantity' => 'required|integer|min:1'
-        ]);
+{
+    $request->validate([
+        'quantity' => 'required|integer|min:1'
+    ]);
 
-        $product->increment('quantity', $request->quantity);
+    $product->increment('quantity', $request->quantity);
+    
+    // Mettre à jour le statut d'alerte de stock bas
+    $product->updateStockAlert();
 
-        return response()->json([
-            'success' => true,
-            'new_quantity' => $product->quantity
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Stock mis à jour avec succès',
+        'new_quantity' => $product->quantity
+    ]);
+}
 
     /**
      * Recherche de produits (pour l'autocomplétion)
