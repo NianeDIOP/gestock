@@ -1131,5 +1131,72 @@ document.addEventListener('DOMContentLoaded', function() {
        });
    });
 });
+
+async function showSaleDetails(saleId) {
+    try {
+        // Afficher un loader
+        document.getElementById('showSaleContent').innerHTML = `
+            <div class="flex items-center justify-center p-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+        `;
+        
+        // Afficher le modal
+        document.getElementById('showSaleModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Charger les données
+        const response = await fetch(`/sales/${saleId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur lors du chargement des détails');
+        }
+
+        // Injecter le contenu dans le modal
+        const content = await response.text();
+        document.getElementById('showSaleContent').innerHTML = content;
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: error.message
+        });
+        closeShowModal();
+    }
+}
+
+// Fonction pour fermer le modal
+function closeShowModal() {
+    document.getElementById('showSaleModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    document.getElementById('showSaleContent').innerHTML = '';
+}
 </script>
+
+<!-- Modal de détails de la vente -->
+<div id="showSaleModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+        
+        <!-- Contenu Modal -->
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-4xl">
+            <div id="showSaleContent">
+                <!-- Le contenu sera chargé dynamiquement ici -->
+            </div>
+            <div class="px-4 sm:px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
+                <button type="button" onclick="closeShowModal()" 
+                    class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

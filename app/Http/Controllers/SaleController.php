@@ -154,18 +154,13 @@ class SaleController extends Controller
     // Affichage d'une vente spécifique
     public function show(Sale $sale)
     {
-        try {
-            $sale->load(['items.product']);
-            if (request()->ajax()) {
-                return view('sales.show', compact('sale'))->render();
-            }
-            return view('sales.show', compact('sale'));
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => "Erreur lors du chargement : " . $e->getMessage()
-            ], 422);
+        $sale->load(['items.product']);
+        
+        if (request()->ajax()) {
+            return view('sales.show', compact('sale'))->render();
         }
+        
+        return view('sales.show', compact('sale'));
     }
 
     public function edit(Sale $sale)

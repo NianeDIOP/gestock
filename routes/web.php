@@ -94,11 +94,18 @@ Route::middleware(['auth'])->group(function () {
 
    // Ventes
    // Ventes
-   Route::resource('sales', SaleController::class); // Celle-ci génère déjà la route show
-   Route::resource('sales', SaleController::class)->except(['create']);
-   Route::get('/sales/{sale}/pdf', [SaleController::class, 'generatePdf'])->name('sales.pdf');
-   Route::delete('/sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
-
+   Route::prefix('sales')->group(function () {
+      // Routes principales
+      Route::get('/', [SaleController::class, 'index'])->name('sales.index');
+      Route::post('/', [SaleController::class, 'store'])->name('sales.store');
+      Route::get('/{sale}', [SaleController::class, 'show'])->name('sales.show');
+      Route::get('/{sale}/edit', [SaleController::class, 'edit'])->name('sales.edit');
+      Route::put('/{sale}', [SaleController::class, 'update'])->name('sales.update');
+      Route::delete('/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
+      
+      // Route pour le PDF
+      Route::get('/{sale}/pdf', [SaleController::class, 'generatePdf'])->name('sales.pdf');
+  });
 
    Route::prefix('suppliers')->group(function () {
       Route::get('/', [SupplierController::class, 'index'])->name('suppliers.index');
